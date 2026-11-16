@@ -794,19 +794,16 @@ if (!Array.prototype.includes) {
           pitch: 1.0
         }).then(function () {
           if (onEnd) onEnd();
-        }).catch(function (e) {
-          if (typeof status !== "undefined" && status) status.textContent = "⚠️ 朗读失败：" + (e && e.message || e);
-          if (onEnd) onEnd();
+        }).catch(function () {
+          speakOnline(text, lang, onEnd);
         });
       } catch (e) {
-        if (typeof status !== "undefined" && status) status.textContent = "⚠️ 朗读失败：" + (e && e.message || e);
-        if (onEnd) onEnd();
+        speakOnline(text, lang, onEnd);
       }
       return null;
     }
     if (!synth) {
-      if (typeof status !== "undefined" && status) status.textContent = "⚠️ 当前设备不支持语音朗读（标音/翻译正常可用）";
-      if (onEnd) onEnd();
+      speakOnline(text, lang, onEnd);
       return null;
     }
     var u = new SpeechSynthesisUtterance(text);
@@ -824,11 +821,55 @@ if (!Array.prototype.includes) {
     synth.speak(u);
     return u;
   }
+  var curAudio = null;
+  function speakOnline(text, lang, onEnd) {
+    try {
+      var le = {
+        zh: "zh",
+        yue: "yue",
+        en: "en",
+        ja: "jp",
+        ko: "kor",
+        fr: "fra",
+        es: "spa",
+        de: "de",
+        ru: "ru"
+      }[lang] || "zh";
+      var url = "https://fanyi.baidu.com/gettts?lan=" + le + "&text=" + encodeURIComponent(text) + "&spd=4&source=web";
+      if (!curAudio) {
+        curAudio = new Audio();
+      }
+      var a = curAudio;
+      try {
+        a.pause();
+      } catch (e) {}
+      a.onended = function () {
+        if (onEnd) onEnd();
+      };
+      a.onerror = function () {
+        if (typeof status !== "undefined" && status) status.textContent = "⚠️ 朗读加载失败，请检查网络";
+        if (onEnd) onEnd();
+      };
+      a.src = url;
+      var pr = a.play();
+      if (pr && pr.catch) pr.catch(function (e) {
+        if (typeof status !== "undefined" && status) status.textContent = "⚠️ 朗读失败：" + (e && e.message || e);
+        if (onEnd) onEnd();
+      });
+    } catch (e) {
+      if (onEnd) onEnd();
+    }
+  }
   function stopSpeak() {
     var tts = capTTS();
     if (tts) {
       try {
         tts.stop();
+      } catch (e) {}
+    }
+    if (curAudio) {
+      try {
+        curAudio.pause();
       } catch (e) {}
     }
     if (synth) {
