@@ -853,30 +853,35 @@ if (!Array.prototype.includes) {
           if (onEnd) onEnd();
         };
         a.onerror = function () {
-          if (typeof status !== "undefined" && status) status.textContent = "⚠️ 朗读加载失败，请检查网络";
+          if (typeof status !== "undefined" && status) status.textContent = "⚠️ 音频播放失败，请检查网络";
           if (onEnd) onEnd();
         };
         a.src = src;
         var pr = a.play();
         if (pr && pr.catch) pr.catch(function (e) {
-          if (typeof status !== "undefined" && status) status.textContent = "⚠️ 朗读失败：" + (e && e.message || e);
+          if (typeof status !== "undefined" && status) status.textContent = "⚠️ 播放被拒：" + (e && e.message || e);
           if (onEnd) onEnd();
         });
       }
-      var CH = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp;
+      function fail(msg) {
+        if (typeof status !== "undefined" && status) status.textContent = "⚠️ " + msg;
+        if (onEnd) onEnd();
+      }
+      var CH = null;
+      try {
+        if (window.Capacitor) {
+          if (window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp) CH = window.Capacitor.Plugins.CapacitorHttp;else if (window.Capacitor.registerPlugin) CH = window.Capacitor.registerPlugin("CapacitorHttp");
+        }
+      } catch (e) {}
       if (CH && CH.get) {
         CH.get({
           url: url,
-          responseType: "arraybuffer",
-          headers: {
-            "User-Agent": "Mozilla/5.0",
-            "Referer": "https://fanyi.baidu.com/"
-          }
+          responseType: "arraybuffer"
         }).then(function (r) {
           try {
-            var d = r.data || "";
+            var d = r && r.data;
             if (typeof d !== "string" || d.length < 50) {
-              playSrc(url);
+              fail("音频数据异常(len=" + (d ? String(d).length : 0) + ")");
               return;
             }
             var bin = atob(d);
@@ -887,10 +892,10 @@ if (!Array.prototype.includes) {
               type: "audio/mpeg"
             })));
           } catch (e) {
-            playSrc(url);
+            fail("解码失败:" + (e && e.message || e));
           }
-        }).catch(function () {
-          playSrc(url);
+        }).catch(function (e) {
+          fail("网络请求失败:" + (e && e.message || e));
         });
       } else {
         playSrc(url);
