@@ -95,8 +95,14 @@
     <div class="hint" id="sampleHint"></div>
     <div class="btnrow">
       <button class="btn primary" id="btnRun">▶ 开始</button>
+      <button class="btn ghost small" id="btnPic">📷 图片</button>
       <button class="btn ghost small" id="btnSample">填示例</button>
       <button class="btn ghost small" id="btnClear">清空</button>
+    </div>
+    <input type="file" id="filePic" accept="image/*" style="display:none">
+    <div id="picPreview" style="display:none;margin-top:8px">
+      <img id="picImg" style="max-width:100%;max-height:200px;border-radius:10px;border:1px solid var(--line)">
+      <div class="hint" id="picStatus"></div>
     </div>
     <div class="btnrow" id="playRow" style="display:none">
       <button class="btn primary" id="btnAll">🔊 整段朗读</button>
@@ -1322,6 +1328,109 @@ if (!Array.prototype.includes) {
     input.value = "";
     result.style.display = "none";
     status.textContent = "";
+  });
+
+  /* ---------- 图片识别（拍照/相册 → 文字） ---------- */
+  function compressImage(file, cb) {
+    var img = new Image();
+    var url = URL.createObjectURL(file);
+    img.onload = function () {
+      var max = 1600,
+        w = img.width,
+        h = img.height;
+      if (w > max || h > max) {
+        var r = Math.min(max / w, max / h);
+        w = Math.round(w * r);
+        h = Math.round(h * r);
+      }
+      var cv = document.createElement("canvas");
+      cv.width = w;
+      cv.height = h;
+      cv.getContext("2d").drawImage(img, 0, 0, w, h);
+      try {
+        URL.revokeObjectURL(url);
+      } catch (e) {}
+      try {
+        cb(cv.toDataURL("image/jpeg", 0.85));
+      } catch (e) {
+        cb(null);
+      }
+    };
+    img.onerror = function () {
+      try {
+        URL.revokeObjectURL(url);
+      } catch (e) {}
+      cb(null);
+    };
+    img.src = url;
+  }
+  function ocrBase64(dataUrl, cb) {
+    var body = "base64Image=" + encodeURIComponent(dataUrl) + "&language=chs&isOverlayRequired=false";
+    var CH = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp;
+    function handle(resp) {
+      try {
+        var d = typeof resp === "string" ? JSON.parse(resp) : resp;
+        if (d && d.ParsedResults && d.ParsedResults[0]) {
+          cb((d.ParsedResults[0].ParsedText || "").replace(/\r/g, "").trim());
+        } else {
+          cb(null, d && (d.ErrorMessage || d.ErrorDetails && d.ErrorDetails[0] && d.ErrorDetails[0].Message) || "识别失败");
+        }
+      } catch (e) {
+        cb(null, "解析失败");
+      }
+    }
+    if (CH && CH.post) {
+      CH.post({
+        url: "https://api.ocr.space/parse/image",
+        headers: {
+          "apikey": "helloworld",
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        data: body
+      }).then(function (r) {
+        handle(r.data);
+      }).catch(function () {
+        cb(null, "网络错误");
+      });
+    } else {
+      fetch("https://api.ocr.space/parse/image", {
+        method: "POST",
+        headers: {
+          "apikey": "helloworld",
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: body
+      }).then(function (r) {
+        return r.text();
+      }).then(handle).catch(function () {
+        cb(null, "网络错误");
+      });
+    }
+  }
+  $("btnPic").addEventListener("click", function () {
+    $("filePic").click();
+  });
+  $("filePic").addEventListener("change", function (ev) {
+    var f = ev.target.files && ev.target.files[0];
+    if (!f) return;
+    $("picPreview").style.display = "block";
+    var st = $("picStatus");
+    st.textContent = "正在识别图片文字…";
+    compressImage(f, function (dataUrl) {
+      if (!dataUrl) {
+        st.textContent = "图片读取失败";
+        return;
+      }
+      $("picImg").src = dataUrl;
+      ocrBase64(dataUrl, function (text, err) {
+        if (text) {
+          input.value = text;
+          st.textContent = "✅ 已识别 " + text.length + " 字，可编辑后点开始";
+        } else {
+          st.textContent = "⚠️ " + (err || "未识别到文字，请重试或手动输入");
+        }
+      });
+    });
   });
 
   // 语音列表就绪后可选
