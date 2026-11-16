@@ -1110,7 +1110,7 @@ if (!Array.prototype.includes) {
     transMap = [];
     var html = "";
     sents.forEach(function (s, i) {
-      html += "<div class=\"sent\" data-i=\"".concat(i, "\"><span class=\"idx\">").concat(i + 1, "</span>\n      <div class=\"orig\">").concat(escapeHtml(s), "</div>\n      <div class=\"trans\" data-role=\"trans\" style=\"display:block;color:#8a6d3b;border-top:none;padding-top:6px\">\u23F3 \u7FFB\u8BD1\u4E2D\u2026</div></div>");
+      html += "<div class=\"sent\" data-i=\"".concat(i, "\"><span class=\"idx\">").concat(i + 1, "</span>\n      <div class=\"orig\">").concat(wrapUnits(s, lang), "</div>\n      <div class=\"trans\" data-role=\"trans\" style=\"display:block;color:#8a6d3b;border-top:none;padding-top:6px\">\u23F3 \u7FFB\u8BD1\u4E2D\u2026</div></div>");
       transMap.push({
         src: s,
         tgt: "",
@@ -1135,6 +1135,17 @@ if (!Array.prototype.includes) {
         speakText(text, lang2, function () {
           highlight(null);
           playing = false;
+        });
+      });
+      el.querySelectorAll(".unit").forEach(function (u) {
+        u.addEventListener("click", function (ev) {
+          ev.stopPropagation();
+          stopSpeak();
+          highlight(el);
+          playing = true;
+          speakText(u.textContent, lang, function () {
+            playing = false;
+          });
         });
       });
     });
