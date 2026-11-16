@@ -69,6 +69,8 @@
   .status{font-size:12px;color:var(--muted);margin-top:8px;min-height:18px;}
   .speaker{float:right;}
   footer{text-align:center;color:#c0b8a8;font-size:11px;margin-top:24px;}
+  .reading .orig .unit{cursor:pointer;border-radius:4px;padding:0 1px;transition:background .15s;}
+  .reading .orig .unit:active{background:#ffe9b8;}
 </style>
 </head>
 <body>
@@ -836,26 +838,57 @@ if (!Array.prototype.includes) {
         ru: "ru"
       }[lang] || "zh";
       var url = "https://fanyi.baidu.com/gettts?lan=" + le + "&text=" + encodeURIComponent(text) + "&spd=4&source=web";
-      if (!curAudio) {
-        curAudio = new Audio();
-      }
-      var a = curAudio;
+      var a = curAudio || (curAudio = new Audio());
       try {
         a.pause();
       } catch (e) {}
-      a.onended = function () {
-        if (onEnd) onEnd();
-      };
-      a.onerror = function () {
-        if (typeof status !== "undefined" && status) status.textContent = "⚠️ 朗读加载失败，请检查网络";
-        if (onEnd) onEnd();
-      };
-      a.src = url;
-      var pr = a.play();
-      if (pr && pr.catch) pr.catch(function (e) {
-        if (typeof status !== "undefined" && status) status.textContent = "⚠️ 朗读失败：" + (e && e.message || e);
-        if (onEnd) onEnd();
-      });
+      function playSrc(src) {
+        a.onended = function () {
+          if (onEnd) onEnd();
+        };
+        a.onerror = function () {
+          if (typeof status !== "undefined" && status) status.textContent = "⚠️ 朗读加载失败，请检查网络";
+          if (onEnd) onEnd();
+        };
+        a.src = src;
+        var pr = a.play();
+        if (pr && pr.catch) pr.catch(function (e) {
+          if (typeof status !== "undefined" && status) status.textContent = "⚠️ 朗读失败：" + (e && e.message || e);
+          if (onEnd) onEnd();
+        });
+      }
+      var CH = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp;
+      if (CH && CH.get) {
+        CH.get({
+          url: url,
+          responseType: "arraybuffer",
+          headers: {
+            "User-Agent": "Mozilla/5.0",
+            "Referer": "https://fanyi.baidu.com/"
+          }
+        }).then(function (r) {
+          try {
+            var d = r.data || "";
+            if (typeof d !== "string" || d.length < 50) {
+              playSrc(url);
+              return;
+            }
+            var bin = atob(d);
+            var n = bin.length;
+            var bytes = new Uint8Array(n);
+            for (var i = 0; i < n; i++) bytes[i] = bin.charCodeAt(i);
+            playSrc(URL.createObjectURL(new Blob([bytes], {
+              type: "audio/mpeg"
+            })));
+          } catch (e) {
+            playSrc(url);
+          }
+        }).catch(function () {
+          playSrc(url);
+        });
+      } else {
+        playSrc(url);
+      }
     } catch (e) {
       if (onEnd) onEnd();
     }
@@ -1019,7 +1052,7 @@ if (!Array.prototype.includes) {
     var html = "";
     sents.forEach(function (s, i) {
       var ph = phonOf(lang, s);
-      html += "<div class=\"sent\" data-i=\"".concat(i, "\">\n      <span class=\"idx\">").concat(i + 1, "</span>\n      <span class=\"speaker\">\uD83D\uDD0A</span>\n      ").concat(ph ? "<div class=\"phon\"></div>" : "", "\n      <div class=\"orig\">").concat(escapeHtml(s), "</div>\n      <div class=\"trans\"></div>\n    </div>");
+      html += "<div class=\"sent\" data-i=\"".concat(i, "\">\n      <span class=\"idx\">").concat(i + 1, "</span>\n      <span class=\"speaker\">\uD83D\uDD0A</span>\n      ").concat(ph ? "<div class=\"phon\"></div>" : "", "\n      <div class=\"orig\">").concat(wrapUnits(s, lang), "</div>\n      <div class=\"trans\"></div>\n    </div>");
     });
     result.innerHTML = html;
     // 填标音
@@ -1052,6 +1085,17 @@ if (!Array.prototype.includes) {
         speakText(sents[i], srcSel.value, function () {
           highlight(null);
           playing = false;
+        });
+      });
+      el.querySelectorAll(".unit").forEach(function (u) {
+        u.addEventListener("click", function (ev) {
+          ev.stopPropagation();
+          stopSpeak();
+          highlight(el);
+          playing = true;
+          speakText(u.textContent, srcSel.value, function () {
+            playing = false;
+          });
         });
       });
     });
@@ -1162,6 +1206,20 @@ if (!Array.prototype.includes) {
         '"': "&quot;"
       }[m];
     });
+  }
+  function wrapUnits(text, lang) {
+    if (lang === "zh" || lang === "yue") {
+      return text.split("").map(function (ch) {
+        if (/[\u4e00-\u9fa5]/.test(ch)) return '<span class="unit">' + ch + '</span>';
+        return escapeHtml(ch);
+      }).join("");
+    }
+    return text.split(/(\s+)/).map(function (w) {
+      if (!w || /^\s+$/.test(w)) return w;
+      var m = w.match(/^([\w\u00C0-\u024F'\u2019\-]+)([^\w]*)$/);
+      if (m && m[1]) return '<span class="unit">' + escapeHtml(m[1]) + '</span>' + escapeHtml(m[2] || "");
+      return escapeHtml(w);
+    }).join("");
   }
   function currentSents() {
     return splitSents(input.value.trim());
