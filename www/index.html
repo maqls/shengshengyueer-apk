@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><script>window.onerror=function(m,s,l,c,e){try{var d=document.getElementById("__err");if(!d){d=document.createElement("div");d.id="__err";d.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#c00;color:#fff;font-size:12px;padding:6px;white-space:pre-wrap;max-height:45%;overflow:auto";document.documentElement.appendChild(d);}d.textContent+="ERR: "+m+" @"+l+":"+c+"\n";}catch(x){}return false;};window.addEventListener("unhandledrejection",function(e){try{var d=document.getElementById("__err");if(!d){d=document.createElement("div");d.id="__err";d.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#c00;color:#fff;font-size:12px;padding:6px;white-space:pre-wrap";document.documentElement.appendChild(d);}d.textContent+="PROMISE: "+((e.reason&&e.reason.message)||e.reason)+"\n";}catch(x){}});</script>
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>多语朗读 · 标音 · 翻译 学习助手</title>
@@ -834,7 +834,7 @@ if (!Array.prototype.includes) {
     try {
       var le = {
         zh: "zh",
-        yue: "yue",
+        yue: "zh",
         en: "en",
         ja: "jp",
         ko: "kor",
@@ -843,6 +843,11 @@ if (!Array.prototype.includes) {
         de: "de",
         ru: "ru"
       }[lang] || "zh";
+      if (lang === "yue" && typeof status !== "undefined" && status) {
+        try {
+          status.textContent = "ℹ️ 粤语语音暂缺，先用普通话代读";
+        } catch (e) {}
+      }
       var url = "https://fanyi.baidu.com/gettts?lan=" + le + "&text=" + encodeURIComponent(text) + "&spd=4&source=web";
       var a = curAudio || (curAudio = new Audio());
       try {
