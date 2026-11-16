@@ -1338,6 +1338,10 @@ if (!Array.prototype.includes) {
     input.value = "";
     result.style.display = "none";
     status.textContent = "";
+    $("picPreview").style.display = "none";
+    $("picImg").removeAttribute("src");
+    $("picStatus").textContent = "";
+    $("filePic").value = "";
   });
 
   /* ---------- 图片识别（拍照/相册 → 文字） ---------- */
