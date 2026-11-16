@@ -740,6 +740,15 @@ if (!Array.prototype.includes) {
 
   /* ---------- 朗读 ---------- */
   var synth = window.speechSynthesis || null;
+  function capTTS() {
+    try {
+      if (window.Capacitor) {
+        if (window.Capacitor.Plugins && window.Capacitor.Plugins.TextToSpeech) return window.Capacitor.Plugins.TextToSpeech;
+        if (window.Capacitor.registerPlugin) return window.Capacitor.registerPlugin("TextToSpeech");
+      }
+    } catch (e) {}
+    return null;
+  }
   var queue = [],
     playing = false,
     timer = null;
@@ -774,6 +783,27 @@ if (!Array.prototype.includes) {
     return null;
   }
   function speakText(text, lang, onEnd) {
+    var tts = capTTS();
+    if (tts) {
+      var lc = LBY[lang] && LBY[lang].speech && LBY[lang].speech[0] || lang;
+      try {
+        tts.speak({
+          text: text,
+          lang: lc,
+          rate: 0.95,
+          pitch: 1.0
+        }).then(function () {
+          if (onEnd) onEnd();
+        }).catch(function (e) {
+          if (typeof status !== "undefined" && status) status.textContent = "⚠️ 朗读失败：" + (e && e.message || e);
+          if (onEnd) onEnd();
+        });
+      } catch (e) {
+        if (typeof status !== "undefined" && status) status.textContent = "⚠️ 朗读失败：" + (e && e.message || e);
+        if (onEnd) onEnd();
+      }
+      return null;
+    }
     if (!synth) {
       if (typeof status !== "undefined" && status) status.textContent = "⚠️ 当前设备不支持语音朗读（标音/翻译正常可用）";
       if (onEnd) onEnd();
@@ -795,6 +825,12 @@ if (!Array.prototype.includes) {
     return u;
   }
   function stopSpeak() {
+    var tts = capTTS();
+    if (tts) {
+      try {
+        tts.stop();
+      } catch (e) {}
+    }
     if (synth) {
       try {
         synth.cancel();
