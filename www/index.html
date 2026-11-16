@@ -739,12 +739,13 @@ if (!Array.prototype.includes) {
   }
 
   /* ---------- 朗读 ---------- */
-  var synth = window.speechSynthesis;
+  var synth = window.speechSynthesis || null;
   var queue = [],
     playing = false,
     timer = null;
   var transMap = []; // 翻译模式：每句 {src, tgt, srcLang, tgtLang}
   function pickVoice(lang) {
+    if (!synth) return null;
     var list = synth.getVoices();
     var l = LBY[lang];
     var prefs = l && l.speech || [lang];
@@ -773,6 +774,11 @@ if (!Array.prototype.includes) {
     return null;
   }
   function speakText(text, lang, onEnd) {
+    if (!synth) {
+      if (typeof status !== "undefined" && status) status.textContent = "⚠️ 当前设备不支持语音朗读（标音/翻译正常可用）";
+      if (onEnd) onEnd();
+      return null;
+    }
     var u = new SpeechSynthesisUtterance(text);
     u.lang = LBY[lang] && LBY[lang].speech[0] || lang;
     var v = pickVoice(lang);
@@ -789,7 +795,11 @@ if (!Array.prototype.includes) {
     return u;
   }
   function stopSpeak() {
-    synth.cancel();
+    if (synth) {
+      try {
+        synth.cancel();
+      } catch (e) {}
+    }
     clearTimeout(timer);
     queue = [];
     playing = false;
