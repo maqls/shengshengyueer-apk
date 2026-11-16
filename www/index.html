@@ -70,7 +70,6 @@
   .speaker{float:right;}
   footer{text-align:center;color:#c0b8a8;font-size:11px;margin-top:24px;}
 </style>
-  <link rel="manifest" href="manifest.json">
 </head>
 <body>
 <div id="app">
@@ -569,9 +568,4 @@ $("sampleHint").textContent="试试：粘贴中/英/日/韩/法/西/德/俄文�
 </script>
 
 </body>
-<script>
-  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(()=>{}); });
-  }
-</script>
 </html>
