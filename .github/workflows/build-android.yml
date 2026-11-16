@@ -30,6 +30,27 @@ jobs:
       - name: Install dependencies
         run: npm ci || npm install
 
+      - name: Patch web for old WebView (auto-fix "tap Start no response")
+        run: |
+          python3 - <<'PY'
+          import os
+          p = 'www/index.html'
+          s = open(p, encoding='utf-8').read()
+          poly = ('<script>if(!Array.prototype.flat){Array.prototype.flat=function(d){'
+                  'd=typeof d==="undefined"?1:d;var r=[];(function f(a,n){a.forEach(function(x){'
+                  'if(Array.isArray(x)&&n>0){f(x,n-1);}else{r.push(x);}});})(this,d);return r;};}'
+                  'if(!Array.prototype.includes){Array.prototype.includes=function(v){return this.indexOf(v)!==-1;};}</script>')
+          if 'Array.prototype.flat' not in s:
+              if '</head>' in s:
+                  s = s.replace('</head>', poly + '</head>', 1)
+              else:
+                  s = poly + s
+              open(p, 'w', encoding='utf-8').write(s)
+              print('polyfill injected ->', p)
+          else:
+              print('polyfill already present ->', p)
+          PY
+
       - name: Sync Capacitor
         run: npx cap sync android
 

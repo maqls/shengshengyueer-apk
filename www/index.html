@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="声声悦耳">
-
+<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -165,6 +165,20 @@ window.DICT = [
 </script>
 <script>
 /* 多语朗读 · 标音 · 翻译 学习助手 */
+/* ---- 兼容旧版手机 WebView：补齐缺失的 Array/Array 方法 ---- */
+if (!Array.prototype.flat) {
+  Array.prototype.flat = function (d) {
+    d = typeof d === "undefined" ? 1 : d;
+    var res = [];
+    (function f(a, n) {
+      a.forEach(function (x) { if (Array.isArray(x) && n > 0) { f(x, n - 1); } else { res.push(x); } });
+    })(this, d);
+    return res;
+  };
+}
+if (!Array.prototype.includes) {
+  Array.prototype.includes = function (v) { return this.indexOf(v) !== -1; };
+}
 (function(){
 "use strict";
 
@@ -323,12 +337,13 @@ function phonOf(code,t){
 
 /* ---------- 分句 ---------- */
 function splitSents(t){
-  return t.split(/\n+/).map(p=>{
-    p=p.trim(); if(!p) return [];
-    // 按句末标点分，保留
-    let parts=p.match(/[^。！？!?；;]+[。！？!?；;]?/g)||[p];
-    return parts.map(s=>s.trim()).filter(Boolean);
-  }).flat();
+  var out=[];
+  t.split(/\n+/).forEach(function(p){
+    p=p.trim(); if(!p) return;
+    var parts=p.match(/[^。！？!?；;]+[。！？!?；;]?/g)||[p];
+    parts.forEach(function(s){ s=s.trim(); if(s) out.push(s); });
+  });
+  return out;
 }
 function splitWords(t){
   return t.split(/\s+/).filter(Boolean);
@@ -566,6 +581,13 @@ $("sampleHint").textContent="试试：粘贴中/英/日/韩/法/西/德/俄文�
 })();
 
 </script>
-
+<script>
+  // 注册离线缓存（HTTPS/本地部署生效；File 协议下自动忽略）
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
+    });
+  }
+</script>
 </body>
 </html>
