@@ -870,7 +870,7 @@ if (!Array.prototype.includes) {
       var CH = null;
       try {
         if (window.Capacitor) {
-          if (window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp) CH = window.Capacitor.Plugins.CapacitorHttp;else if (window.Capacitor.registerPlugin) CH = window.Capacitor.registerPlugin("CapacitorHttp");
+          CH = window.Capacitor.CapacitorHttp || window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp || null;
         }
       } catch (e) {}
       if (CH && CH.get) {
@@ -1160,7 +1160,12 @@ if (!Array.prototype.includes) {
         });
       });
     });
+    var sameSys = mtCode(lang) === mtCode(tgt);
     sents.forEach(function (s, i) {
+      if (sameSys) {
+        els[i].querySelector(".trans").textContent = "🌍 同属中文，无需翻译（可点🔊听读音）";
+        return;
+      }
       translateOne(s, lang, tgt).then(function (txt) {
         transMap[i].tgt = txt;
         var tr = els[i].querySelector(".trans");
