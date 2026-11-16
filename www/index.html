@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
+<head><script>window.onerror=function(m,s,l,c,e){try{var d=document.getElementById("__err");if(!d){d=document.createElement("div");d.id="__err";d.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#c00;color:#fff;font-size:12px;padding:6px;white-space:pre-wrap;max-height:45%;overflow:auto";document.documentElement.appendChild(d);}d.textContent+="ERR: "+m+" @"+l+":"+c+"\n";}catch(x){}return false;};window.addEventListener("unhandledrejection",function(e){try{var d=document.getElementById("__err");if(!d){d=document.createElement("div");d.id="__err";d.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#c00;color:#fff;font-size:12px;padding:6px;white-space:pre-wrap";document.documentElement.appendChild(d);}d.textContent+="PROMISE: "+((e.reason&&e.reason.message)||e.reason)+"\n";}catch(x){}});</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>多语朗读 · 标音 · 翻译 学习助手</title>
@@ -164,6 +164,17 @@ window.DICT = [
 
 </script>
 <script>
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var r, e, o = "function" == typeof Symbol ? Symbol : {}, n = o.iterator || "@@iterator", a = o.toStringTag || "@@toStringTag"; function i(o, n, a, i) { var u = n && n.prototype instanceof Generator ? n : Generator, f = Object.create(u.prototype); return _regeneratorDefine2(f, "_invoke", function (t, o, n) { var a, i, u, f = 0, p = n || [], y = !1, G = { p: 0, n: 0, v: r, a: l, f: l.bind(r, 4), d: function d(t, e) { return a = t, i = 0, u = r, G.n = e, c; } }; function l(t, o) { for (i = t, u = o, e = 0; !y && f && !n && e < p.length; e++) { var n, a = p[e], l = G.p, F = a[2]; t > 3 ? (n = F === o) && (u = a[(i = a[4]) ? 5 : (i = 3, 3)], a[4] = a[5] = r) : a[0] <= l && ((n = t < 2 && l < a[1]) ? (i = 0, G.v = o, G.n = a[1]) : l < F && (n = t < 3 || a[0] > o || o > F) && (a[4] = t, a[5] = o, G.n = F, i = 0)); } if (n || t > 1) return c; throw y = !0, o; } return function (n, p, F) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && l(p, F), i = p, u = F; (e = i < 2 ? r : u) || !y;) { a || (i ? (i > 1 && (G.n = i < 3 ? -1 : u), l(i, u)) : G.v = u); try { if (f = 2, a) { if (i || (n = "next"), e = a[n]) { if (!(e = e.call(a, u))) throw TypeError("iterator result is not an object"); if (!e.done) return e; u = e.value, i < 2 && (i = 0); } else 1 === i && (e = a.return) && e.call(a), i < 2 && (u = TypeError("The iterator does not provide a '" + n + "' method"), i = 1); a = r; } else if ((e = (y = G.n < 0) ? u : t.call(o, G)) !== c) break; } catch (t) { a = r, i = 1, u = t; } finally { f = 1; } } return { value: e, done: y }; }; }(o, a, i), !0), f; } var c = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} e = Object.getPrototypeOf; var u = [][n] ? e(e([][n]())) : (_regeneratorDefine2(e = {}, n, function () { return this; }), e), f = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(u); function p(r) { return Object.setPrototypeOf ? Object.setPrototypeOf(r, GeneratorFunctionPrototype) : (r.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(r, a, "GeneratorFunction")), r.prototype = Object.create(f), r; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(f, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, a, "GeneratorFunction"), _regeneratorDefine2(f), _regeneratorDefine2(f, a, "Generator"), _regeneratorDefine2(f, n, function () { return this; }), _regeneratorDefine2(f, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: p }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+function _createForOfIteratorHelper(e, t) { var _n = "undefined" != typeof Symbol && e[Symbol.iterator] || e["@@iterator"]; if (!_n) { if (Array.isArray(e) || (_n = _unsupportedIterableToArray(e)) || t && e && "number" == typeof e.length) { _n && (e = _n); var o = 0, F = function F() {}; return { s: F, n: function n() { return o >= e.length ? { done: !0 } : { done: !1, value: e[o++] }; }, e: function e(r) { throw r; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var a, u, i = !0; return { s: function s() { _n = _n.call(e); }, n: function n() { i = !0; var r = _n.next(); return r.done ? { done: !0 } : { value: r.value, done: i = !1 }; }, e: function e(r) { a = !0, u = r; }, f: function f() { try { i || null == _n.return || _n.return(); } finally { if (a) throw u; } } }; }
+function _toConsumableArray(a) { return _arrayWithoutHoles(a) || _iterableToArray(a) || _unsupportedIterableToArray(a) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(t, e) { if (t) { if ("string" == typeof t) return _arrayLikeToArray(t, e); var o = {}.toString.call(t).slice(8, -1); return "Object" === o && t.constructor && (o = t.constructor.name), "Map" === o || "Set" === o ? Array.from(t) : "Arguments" === o || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(o) ? _arrayLikeToArray(t, e) : void 0; } }
+function _iterableToArray(r) { var e = "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (Array.isArray(r) && (null == e || e === ("undefined" != typeof Symbol && [][Symbol.iterator]) || e === []["@@iterator"])) return r; if (null != e) { for (var t, o = [], a = e.call(r); !(t = a.next()).done;) o.push(t.value); return o; } }
+function _arrayWithoutHoles(a) { if (Array.isArray(a)) return _arrayLikeToArray(a); }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 /* 多语朗读 · 标音 · 翻译 学习助手 */
 /* ---- 兼容旧版手机 WebView：补齐缺失的 Array/Array 方法 ---- */
 if (!Array.prototype.flat) {
@@ -171,415 +182,1001 @@ if (!Array.prototype.flat) {
     d = typeof d === "undefined" ? 1 : d;
     var res = [];
     (function f(a, n) {
-      a.forEach(function (x) { if (Array.isArray(x) && n > 0) { f(x, n - 1); } else { res.push(x); } });
+      a.forEach(function (x) {
+        if (Array.isArray(x) && n > 0) {
+          f(x, n - 1);
+        } else {
+          res.push(x);
+        }
+      });
     })(this, d);
     return res;
   };
 }
 if (!Array.prototype.includes) {
-  Array.prototype.includes = function (v) { return this.indexOf(v) !== -1; };
+  Array.prototype.includes = function (v) {
+    return this.indexOf(v) !== -1;
+  };
 }
-(function(){
-"use strict";
+(function () {
+  "use strict";
 
-/* ---------- 语言配置 ---------- */
-const LANGS = [
-  {code:"zh", name:"中文", script:"zh", speech:["zh-CN","zh"], phon:"拼音"},
-  {code:"yue",name:"粤语", script:"zh", speech:["zh-HK","yue","zh-CN"], phon:"粤拼"},
-  {code:"en", name:"英文", script:"en", speech:["en-US","en-GB","en"], phon:"音标 IPA"},
-  {code:"ja", name:"日文", script:"ja", speech:["ja-JP","ja"], phon:"罗马音"},
-  {code:"ko", name:"韩文", script:"ko", speech:["ko-KR","ko"], phon:"罗马音"},
-  {code:"fr", name:"法文", script:"fr", speech:["fr-FR","fr"], phon:"读音"},
-  {code:"es", name:"西班牙文",script:"es", speech:["es-ES","es"], phon:"读音"},
-  {code:"de", name:"德文", script:"de", speech:["de-DE","de"], phon:"读音"},
-  {code:"ru", name:"俄文", script:"ru", speech:["ru-RU","ru"], phon:"读音"},
-];
-const LBY = {}; LANGS.forEach(l=>LBY[l.code]=l);
-const SRC = LANGS.find(l=>l.code==="zh");
-const TGT = LANGS.find(l=>l.code==="en");
+  /* ---------- 语言配置 ---------- */
+  var LANGS = [{
+    code: "zh",
+    name: "中文",
+    script: "zh",
+    speech: ["zh-CN", "zh"],
+    phon: "拼音"
+  }, {
+    code: "yue",
+    name: "粤语",
+    script: "zh",
+    speech: ["zh-HK", "yue", "zh-CN"],
+    phon: "粤拼"
+  }, {
+    code: "en",
+    name: "英文",
+    script: "en",
+    speech: ["en-US", "en-GB", "en"],
+    phon: "音标 IPA"
+  }, {
+    code: "ja",
+    name: "日文",
+    script: "ja",
+    speech: ["ja-JP", "ja"],
+    phon: "罗马音"
+  }, {
+    code: "ko",
+    name: "韩文",
+    script: "ko",
+    speech: ["ko-KR", "ko"],
+    phon: "罗马音"
+  }, {
+    code: "fr",
+    name: "法文",
+    script: "fr",
+    speech: ["fr-FR", "fr"],
+    phon: "读音"
+  }, {
+    code: "es",
+    name: "西班牙文",
+    script: "es",
+    speech: ["es-ES", "es"],
+    phon: "读音"
+  }, {
+    code: "de",
+    name: "德文",
+    script: "de",
+    speech: ["de-DE", "de"],
+    phon: "读音"
+  }, {
+    code: "ru",
+    name: "俄文",
+    script: "ru",
+    speech: ["ru-RU", "ru"],
+    phon: "读音"
+  }];
+  var LBY = {};
+  LANGS.forEach(function (l) {
+    return LBY[l.code] = l;
+  });
+  var SRC = LANGS.find(function (l) {
+    return l.code === "zh";
+  });
+  var TGT = LANGS.find(function (l) {
+    return l.code === "en";
+  });
 
-/* ---------- DOM ---------- */
-const $ = id=>document.getElementById(id);
-const input=$("input"), srcSel=$("srcLang"), tgtSel=$("tgtLang"),
-  modePills=$("modePills"), result=$("result"), status=$("status"),
-  btnRun=$("btnRun"), playRow=$("playRow"), switchPhon=$("switchPhon");
+  /* ---------- DOM ---------- */
+  var $ = function $(id) {
+    return document.getElementById(id);
+  };
+  var input = $("input"),
+    srcSel = $("srcLang"),
+    tgtSel = $("tgtLang"),
+    modePills = $("modePills"),
+    result = $("result"),
+    status = $("status"),
+    btnRun = $("btnRun"),
+    playRow = $("playRow"),
+    switchPhon = $("switchPhon");
 
-/* ---------- 标音：各语言本地规则 ---------- */
-const PY = window.PY||{};
-const ENIPA = window.ENIPA||{};
-const YUE = window.YUE||{};
+  /* ---------- 标音：各语言本地规则 ---------- */
+  var PY = window.PY || {};
+  var ENIPA = window.ENIPA || {};
+  var YUE = window.YUE || {};
 
-// 中文 拼音（逐字，标点/非汉字保留空格）
-function phonChinese(t){
-  return [...t].map(ch=>{
-    if(/[\u4e00-\u9fff]/.test(ch)) return PY[ch]||"";
-    return ""; // 标点不标音
-  }).join(" ").replace(/\s+/g," ").trim();
-}
-// 粤语 粤拼（逐字）
-function phonYue(t){
-  return [...t].map(ch=>{ if(/[\u4e00-\u9fff]/.test(ch)) return YUE[ch]||""; return ""; })
-    .join(" ").replace(/\s+/g," ").trim();
-}
-// 英文 IPA（逐词）
-function phonEn(t){
-  return t.split(/\s+/).filter(Boolean).map(w=>{
-    const key=w.toLowerCase().replace(/[^a-z]/g,"");
-    return ENIPA[key] || "";
-  }).join(" ");
-}
-
-// 日语 假名→罗马音
-const KANA_RO={
-  "あ":"a","い":"i","う":"u","え":"e","お":"o",
-  "か":"ka","き":"ki","く":"ku","け":"ke","こ":"ko",
-  "さ":"sa","し":"shi","す":"su","せ":"se","そ":"so",
-  "た":"ta","ち":"chi","つ":"tsu","て":"te","と":"to",
-  "な":"na","に":"ni","ぬ":"nu","ね":"ne","の":"no",
-  "は":"ha","ひ":"hi","ふ":"fu","へ":"he","ほ":"ho",
-  "ま":"ma","み":"mi","む":"mu","め":"me","も":"mo",
-  "や":"ya","ゆ":"yu","よ":"yo",
-  "ら":"ra","り":"ri","る":"ru","れ":"re","ろ":"ro",
-  "わ":"wa","を":"o","ん":"n",
-  "が":"ga","ぎ":"gi","ぐ":"gu","げ":"ge","ご":"go",
-  "ざ":"za","じ":"ji","ず":"zu","ぜ":"ze","ぞ":"zo",
-  "だ":"da","ぢ":"ji","づ":"zu","で":"de","ど":"do",
-  "ば":"ba","び":"bi","ぶ":"bu","べ":"be","ぼ":"bo",
-  "ぱ":"pa","ぴ":"pi","ぷ":"pu","ぺ":"pe","ぽ":"po",
-  "ア":"a","イ":"i","ウ":"u","エ":"e","オ":"o",
-  "カ":"ka","キ":"ki","ク":"ku","ケ":"ke","コ":"ko",
-  "サ":"sa","シ":"shi","ス":"su","セ":"se","ソ":"so",
-  "タ":"ta","チ":"chi","ツ":"tsu","テ":"te","ト":"to",
-  "ナ":"na","ニ":"ni","ヌ":"nu","ネ":"ne","ノ":"no",
-  "ハ":"ha","ヒ":"hi","フ":"fu","ヘ":"he","ホ":"ho",
-  "マ":"ma","ミ":"mi","ム":"mu","メ":"me","モ":"mo",
-  "ヤ":"ya","ユ":"yu","ヨ":"yo",
-  "ラ":"ra","リ":"ri","ル":"ru","レ":"re","ロ":"ro",
-  "ワ":"wa","ヲ":"o","ン":"n",
-  "ガ":"ga","ギ":"gi","グ":"gu","ゲ":"ge","ゴ":"go",
-  "ザ":"za","ジ":"ji","ズ":"zu","ゼ":"ze","ゾ":"zo",
-  "ダ":"da","ヂ":"ji","ヅ":"zu","デ":"de","ド":"do",
-  "バ":"ba","ビ":"bi","ブ":"bu","ベ":"be","ボ":"bo",
-  "パ":"pa","ピ":"pi","プ":"pu","ペ":"pe","ポ":"po"
-};
-function phonJa(t){
-  let out="";
-  for(const ch of t){
-    if(KANA_RO[ch]){ out+=(out&&!out.endsWith(" "))?" ":""; out+=KANA_RO[ch]+" "; }
-    else if(/[\u3041-\u3096\u30a1-\u30f6]/.test(ch)){/*小假名/未覆盖*/ }
-    else if(/\s/.test(ch)){ out+=" "; }
-    else { /* 汉字不标音，留空 */ }
+  // 中文 拼音（逐字，标点/非汉字保留空格）
+  function phonChinese(t) {
+    return _toConsumableArray(t).map(function (ch) {
+      if (/[\u4e00-\u9fff]/.test(ch)) return PY[ch] || "";
+      return ""; // 标点不标音
+    }).join(" ").replace(/\s+/g, " ").trim();
   }
-  return out.replace(/\s+/g," ").trim();
-}
+  // 粤语 粤拼（逐字）
+  function phonYue(t) {
+    return _toConsumableArray(t).map(function (ch) {
+      if (/[\u4e00-\u9fff]/.test(ch)) return YUE[ch] || "";
+      return "";
+    }).join(" ").replace(/\s+/g, " ").trim();
+  }
+  // 英文 IPA（逐词）
+  function phonEn(t) {
+    return t.split(/\s+/).filter(Boolean).map(function (w) {
+      var key = w.toLowerCase().replace(/[^a-z]/g, "");
+      return ENIPA[key] || "";
+    }).join(" ");
+  }
 
-// 韩语 谚文→罗马音（Revised Romanization）
-const CHOSUNG=["g","kk","n","d","tt","r","m","b","pp","s","ss","","j","jj","ch","k","t","p","h"];
-const JUNGSONG=["a","ae","ya","yae","eo","e","yeo","ye","o","wa","wae","oe","yo","u","wo","we","wi","yu","eu","ui","i"];
-const JONGSUNG=["","k","k","k","k","n","n","n","t","t","l","k","m","p","t","t","ng","t","t","k","t","p","h","t","t","t","t",""];
-const JUNG={
-  "ᅡ":0,"ᅢ":1,"ᅣ":2,"ᅤ":3,"ᅥ":4,"ᅦ":5,"ᅧ":6,"ᅨ":7,"ᅩ":8,"ᅪ":9,"ᅫ":10,"ᅬ":11,
-  "ᅭ":12,"ᅮ":13,"ᅯ":14,"ᅰ":15,"ᅱ":16,"ᅲ":17,"ᅳ":18,"ᅴ":19,"ᅵ":20
-};
-function romanizeHangul(s){
-  const base=0xAC00;
-  return [...s].map(ch=>{
-    const c=ch.codePointAt(0);
-    if(c>=base&&c<base+11172){
-      const d=c-base, cho=Math.floor(d/588), jung=Math.floor((d%588)/28), jong=d%28;
-      return CHOSUNG[cho]+JUNGSONG[jung]+JONGSUNG[jong];
+  // 日语 假名→罗马音
+  var KANA_RO = {
+    "あ": "a",
+    "い": "i",
+    "う": "u",
+    "え": "e",
+    "お": "o",
+    "か": "ka",
+    "き": "ki",
+    "く": "ku",
+    "け": "ke",
+    "こ": "ko",
+    "さ": "sa",
+    "し": "shi",
+    "す": "su",
+    "せ": "se",
+    "そ": "so",
+    "た": "ta",
+    "ち": "chi",
+    "つ": "tsu",
+    "て": "te",
+    "と": "to",
+    "な": "na",
+    "に": "ni",
+    "ぬ": "nu",
+    "ね": "ne",
+    "の": "no",
+    "は": "ha",
+    "ひ": "hi",
+    "ふ": "fu",
+    "へ": "he",
+    "ほ": "ho",
+    "ま": "ma",
+    "み": "mi",
+    "む": "mu",
+    "め": "me",
+    "も": "mo",
+    "や": "ya",
+    "ゆ": "yu",
+    "よ": "yo",
+    "ら": "ra",
+    "り": "ri",
+    "る": "ru",
+    "れ": "re",
+    "ろ": "ro",
+    "わ": "wa",
+    "を": "o",
+    "ん": "n",
+    "が": "ga",
+    "ぎ": "gi",
+    "ぐ": "gu",
+    "げ": "ge",
+    "ご": "go",
+    "ざ": "za",
+    "じ": "ji",
+    "ず": "zu",
+    "ぜ": "ze",
+    "ぞ": "zo",
+    "だ": "da",
+    "ぢ": "ji",
+    "づ": "zu",
+    "で": "de",
+    "ど": "do",
+    "ば": "ba",
+    "び": "bi",
+    "ぶ": "bu",
+    "べ": "be",
+    "ぼ": "bo",
+    "ぱ": "pa",
+    "ぴ": "pi",
+    "ぷ": "pu",
+    "ぺ": "pe",
+    "ぽ": "po",
+    "ア": "a",
+    "イ": "i",
+    "ウ": "u",
+    "エ": "e",
+    "オ": "o",
+    "カ": "ka",
+    "キ": "ki",
+    "ク": "ku",
+    "ケ": "ke",
+    "コ": "ko",
+    "サ": "sa",
+    "シ": "shi",
+    "ス": "su",
+    "セ": "se",
+    "ソ": "so",
+    "タ": "ta",
+    "チ": "chi",
+    "ツ": "tsu",
+    "テ": "te",
+    "ト": "to",
+    "ナ": "na",
+    "ニ": "ni",
+    "ヌ": "nu",
+    "ネ": "ne",
+    "ノ": "no",
+    "ハ": "ha",
+    "ヒ": "hi",
+    "フ": "fu",
+    "ヘ": "he",
+    "ホ": "ho",
+    "マ": "ma",
+    "ミ": "mi",
+    "ム": "mu",
+    "メ": "me",
+    "モ": "mo",
+    "ヤ": "ya",
+    "ユ": "yu",
+    "ヨ": "yo",
+    "ラ": "ra",
+    "リ": "ri",
+    "ル": "ru",
+    "レ": "re",
+    "ロ": "ro",
+    "ワ": "wa",
+    "ヲ": "o",
+    "ン": "n",
+    "ガ": "ga",
+    "ギ": "gi",
+    "グ": "gu",
+    "ゲ": "ge",
+    "ゴ": "go",
+    "ザ": "za",
+    "ジ": "ji",
+    "ズ": "zu",
+    "ゼ": "ze",
+    "ゾ": "zo",
+    "ダ": "da",
+    "ヂ": "ji",
+    "ヅ": "zu",
+    "デ": "de",
+    "ド": "do",
+    "バ": "ba",
+    "ビ": "bi",
+    "ブ": "bu",
+    "ベ": "be",
+    "ボ": "bo",
+    "パ": "pa",
+    "ピ": "pi",
+    "プ": "pu",
+    "ペ": "pe",
+    "ポ": "po"
+  };
+  function phonJa(t) {
+    var out = "";
+    var _iterator = _createForOfIteratorHelper(t),
+      _step;
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var ch = _step.value;
+        if (KANA_RO[ch]) {
+          out += out && !out.endsWith(" ") ? " " : "";
+          out += KANA_RO[ch] + " ";
+        } else if (/[\u3041-\u3096\u30a1-\u30f6]/.test(ch)) {/*小假名/未覆盖*/} else if (/\s/.test(ch)) {
+          out += " ";
+        } else {/* 汉字不标音，留空 */}
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
     }
-    if(/[\uac00-\ud7af]/.test(ch)) return "";
-    return /\s/.test(ch)?" ":ch;
-  }).join(" ").replace(/\s+/g," ").trim();
-}
-
-// 法语/西语/德语/俄语 规则读音转写（近似音标）
-const FR_ACC={"à":"a","â":"a","ä":"a","é":"e","è":"e","ê":"e","ë":"e","î":"i","ï":"i","ô":"o","ö":"o","ù":"u","û":"u","ü":"y","ç":"s"};
-function phonFr(t){
-  let s=""; for(const c of t){ const L=c.toLowerCase(); if(FR_ACC[L]){s+=FR_ACC[L];continue;}
-    if(/\s/.test(c)){s+=" ";continue;} if(/[a-zA-Z]/.test(c)){s+=L;} }
-  return s.replace(/\s+/g," ").trim();
-}
-const ES_ACC={"á":"a","é":"e","í":"i","ó":"o","ú":"u","ñ":"ny","ü":"u"};
-function phonEs(t){
-  let s=""; for(const c of t){ const L=c.toLowerCase(); if(ES_ACC[L]){s+=ES_ACC[L];continue;}
-    if(/\s/.test(c)){s+=" ";continue;} if(/[a-zA-Z]/.test(c)){s+=L;} }
-  return s.replace(/\s+/g," ").trim();
-}
-const DE_ACC={"ä":"e","ö":"o","ü":"ü","ß":"ss"};
-function phonDe(t){
-  let s=""; for(const c of t){ const L=c.toLowerCase(); if(DE_ACC[L]){s+=DE_ACC[L];continue;}
-    if(/\s/.test(c)){s+=" ";continue;} if(/[a-zA-Z]/.test(c)){s+=L;} }
-  return s.replace(/\s+/g," ").trim();
-}
-const RU_CY={"а":"a","б":"b","в":"v","г":"g","д":"d","е":"ye","ё":"yo","ж":"zh","з":"z","и":"i","й":"y","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t","у":"u","ф":"f","х":"kh","ц":"ts","ч":"ch","ш":"sh","щ":"shch","ъ":"","ы":"y","ь":"","э":"e","ю":"yu","я":"ya"};
-function phonRu(t){
-  let s=""; for(const c of t){ const L=c.toLowerCase(); if(RU_CY[L]){s+=RU_CY[L];continue;}
-    if(/\s/.test(c)){s+=" ";continue;} if(/[a-zA-Z]/.test(c)){s+=L;} }
-  return s.replace(/\s+/g," ").trim();
-}
-
-function phonOf(code,t){
-  switch(code){
-    case "zh": return phonChinese(t);
-    case "yue":return phonYue(t);
-    case "en": return phonEn(t);
-    case "ja": return phonJa(t);
-    case "ko": return romanizeHangul(t);
-    case "fr": return phonFr(t);
-    case "es": return phonEs(t);
-    case "de": return phonDe(t);
-    case "ru": return phonRu(t);
-    default: return "";
+    return out.replace(/\s+/g, " ").trim();
   }
-}
 
-/* ---------- 分句 ---------- */
-function splitSents(t){
-  var out=[];
-  t.split(/\n+/).forEach(function(p){
-    p=p.trim(); if(!p) return;
-    var parts=p.match(/[^。！？!?；;]+[。！？!?；;]?/g)||[p];
-    parts.forEach(function(s){ s=s.trim(); if(s) out.push(s); });
-  });
-  return out;
-}
-function splitWords(t){
-  return t.split(/\s+/).filter(Boolean);
-}
-
-/* ---------- 朗读 ---------- */
-let synth=window.speechSynthesis;
-let queue=[], playing=false, timer=null;
-let transMap=[]; // 翻译模式：每句 {src, tgt, srcLang, tgtLang}
-function pickVoice(lang){
-  const list=synth.getVoices();
-  const l=LBY[lang];
-  const prefs=(l&&l.speech)||[lang];
-  for(const p of prefs){
-    const v=list.find(v=>v.lang.replace("_","-").toLowerCase().
-      startsWith(p.toLowerCase()));
-    if(v) return v;
+  // 韩语 谚文→罗马音（Revised Romanization）
+  var CHOSUNG = ["g", "kk", "n", "d", "tt", "r", "m", "b", "pp", "s", "ss", "", "j", "jj", "ch", "k", "t", "p", "h"];
+  var JUNGSONG = ["a", "ae", "ya", "yae", "eo", "e", "yeo", "ye", "o", "wa", "wae", "oe", "yo", "u", "wo", "we", "wi", "yu", "eu", "ui", "i"];
+  var JONGSUNG = ["", "k", "k", "k", "k", "n", "n", "n", "t", "t", "l", "k", "m", "p", "t", "t", "ng", "t", "t", "k", "t", "p", "h", "t", "t", "t", "t", ""];
+  var JUNG = {
+    "ᅡ": 0,
+    "ᅢ": 1,
+    "ᅣ": 2,
+    "ᅤ": 3,
+    "ᅥ": 4,
+    "ᅦ": 5,
+    "ᅧ": 6,
+    "ᅨ": 7,
+    "ᅩ": 8,
+    "ᅪ": 9,
+    "ᅫ": 10,
+    "ᅬ": 11,
+    "ᅭ": 12,
+    "ᅮ": 13,
+    "ᅯ": 14,
+    "ᅰ": 15,
+    "ᅱ": 16,
+    "ᅲ": 17,
+    "ᅳ": 18,
+    "ᅴ": 19,
+    "ᅵ": 20
+  };
+  function romanizeHangul(s) {
+    var base = 0xAC00;
+    return _toConsumableArray(s).map(function (ch) {
+      var c = ch.codePointAt(0);
+      if (c >= base && c < base + 11172) {
+        var d = c - base,
+          cho = Math.floor(d / 588),
+          jung = Math.floor(d % 588 / 28),
+          jong = d % 28;
+        return CHOSUNG[cho] + JUNGSONG[jung] + JONGSUNG[jong];
+      }
+      if (/[\uac00-\ud7af]/.test(ch)) return "";
+      return /\s/.test(ch) ? " " : ch;
+    }).join(" ").replace(/\s+/g, " ").trim();
   }
-  return null;
-}
-function speakText(text,lang,onEnd){
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang=(LBY[lang]&&LBY[lang].speech[0])||lang;
-  const v=pickVoice(lang); if(v) u.voice=v;
-  u.rate=0.95; u.pitch=1;
-  u.onend=()=>onEnd&&onEnd();
-  u.onerror=()=>onEnd&&onEnd();
-  synth.speak(u);
-  return u;
-}
-function stopSpeak(){ synth.cancel(); clearTimeout(timer); queue=[]; playing=false; }
 
-/* 逐句朗读（带高亮） */
-function playSentenceBySentence(sents,htmlEls,lang){
-  stopSpeak(); queue=sents; playing=true;
-  let i=0; const elArr=htmlEls||[];
-  function step(){
-    if(!playing||i>=queue.length){ playing=false; highlight(null); return; }
-    highlight(elArr[i]||null);
-    speakText(queue[i],lang,()=>{
-      if(!playing) return;
-      i++; step();
+  // 法语/西语/德语/俄语 规则读音转写（近似音标）
+  var FR_ACC = {
+    "à": "a",
+    "â": "a",
+    "ä": "a",
+    "é": "e",
+    "è": "e",
+    "ê": "e",
+    "ë": "e",
+    "î": "i",
+    "ï": "i",
+    "ô": "o",
+    "ö": "o",
+    "ù": "u",
+    "û": "u",
+    "ü": "y",
+    "ç": "s"
+  };
+  function phonFr(t) {
+    var s = "";
+    var _iterator2 = _createForOfIteratorHelper(t),
+      _step2;
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var c = _step2.value;
+        var L = c.toLowerCase();
+        if (FR_ACC[L]) {
+          s += FR_ACC[L];
+          continue;
+        }
+        if (/\s/.test(c)) {
+          s += " ";
+          continue;
+        }
+        if (/[a-zA-Z]/.test(c)) {
+          s += L;
+        }
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+    return s.replace(/\s+/g, " ").trim();
+  }
+  var ES_ACC = {
+    "á": "a",
+    "é": "e",
+    "í": "i",
+    "ó": "o",
+    "ú": "u",
+    "ñ": "ny",
+    "ü": "u"
+  };
+  function phonEs(t) {
+    var s = "";
+    var _iterator3 = _createForOfIteratorHelper(t),
+      _step3;
+    try {
+      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+        var c = _step3.value;
+        var L = c.toLowerCase();
+        if (ES_ACC[L]) {
+          s += ES_ACC[L];
+          continue;
+        }
+        if (/\s/.test(c)) {
+          s += " ";
+          continue;
+        }
+        if (/[a-zA-Z]/.test(c)) {
+          s += L;
+        }
+      }
+    } catch (err) {
+      _iterator3.e(err);
+    } finally {
+      _iterator3.f();
+    }
+    return s.replace(/\s+/g, " ").trim();
+  }
+  var DE_ACC = {
+    "ä": "e",
+    "ö": "o",
+    "ü": "ü",
+    "ß": "ss"
+  };
+  function phonDe(t) {
+    var s = "";
+    var _iterator4 = _createForOfIteratorHelper(t),
+      _step4;
+    try {
+      for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+        var c = _step4.value;
+        var L = c.toLowerCase();
+        if (DE_ACC[L]) {
+          s += DE_ACC[L];
+          continue;
+        }
+        if (/\s/.test(c)) {
+          s += " ";
+          continue;
+        }
+        if (/[a-zA-Z]/.test(c)) {
+          s += L;
+        }
+      }
+    } catch (err) {
+      _iterator4.e(err);
+    } finally {
+      _iterator4.f();
+    }
+    return s.replace(/\s+/g, " ").trim();
+  }
+  var RU_CY = {
+    "а": "a",
+    "б": "b",
+    "в": "v",
+    "г": "g",
+    "д": "d",
+    "е": "ye",
+    "ё": "yo",
+    "ж": "zh",
+    "з": "z",
+    "и": "i",
+    "й": "y",
+    "к": "k",
+    "л": "l",
+    "м": "m",
+    "н": "n",
+    "о": "o",
+    "п": "p",
+    "р": "r",
+    "с": "s",
+    "т": "t",
+    "у": "u",
+    "ф": "f",
+    "х": "kh",
+    "ц": "ts",
+    "ч": "ch",
+    "ш": "sh",
+    "щ": "shch",
+    "ъ": "",
+    "ы": "y",
+    "ь": "",
+    "э": "e",
+    "ю": "yu",
+    "я": "ya"
+  };
+  function phonRu(t) {
+    var s = "";
+    var _iterator5 = _createForOfIteratorHelper(t),
+      _step5;
+    try {
+      for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+        var c = _step5.value;
+        var L = c.toLowerCase();
+        if (RU_CY[L]) {
+          s += RU_CY[L];
+          continue;
+        }
+        if (/\s/.test(c)) {
+          s += " ";
+          continue;
+        }
+        if (/[a-zA-Z]/.test(c)) {
+          s += L;
+        }
+      }
+    } catch (err) {
+      _iterator5.e(err);
+    } finally {
+      _iterator5.f();
+    }
+    return s.replace(/\s+/g, " ").trim();
+  }
+  function phonOf(code, t) {
+    switch (code) {
+      case "zh":
+        return phonChinese(t);
+      case "yue":
+        return phonYue(t);
+      case "en":
+        return phonEn(t);
+      case "ja":
+        return phonJa(t);
+      case "ko":
+        return romanizeHangul(t);
+      case "fr":
+        return phonFr(t);
+      case "es":
+        return phonEs(t);
+      case "de":
+        return phonDe(t);
+      case "ru":
+        return phonRu(t);
+      default:
+        return "";
+    }
+  }
+
+  /* ---------- 分句 ---------- */
+  function splitSents(t) {
+    var out = [];
+    t.split(/\n+/).forEach(function (p) {
+      p = p.trim();
+      if (!p) return;
+      var parts = p.match(/[^。！？!?；;]+[。！？!?；;]?/g) || [p];
+      parts.forEach(function (s) {
+        s = s.trim();
+        if (s) out.push(s);
+      });
     });
+    return out;
   }
-  step();
-}
-function highlight(el){
-  result.querySelectorAll(".sent.active").forEach(e=>e.classList.remove("active"));
-  if(el) el.classList.add("active");
-  const r=el&&el.getBoundingClientRect();
-  if(el&&r){ el.scrollIntoView({behavior:"smooth",block:"center"}); }
-}
+  function splitWords(t) {
+    return t.split(/\s+/).filter(Boolean);
+  }
 
-/* ---------- 翻译 ---------- */
-function mtCode(c){ return {zh:"zh-CN",yue:"zh-CN",en:"en",ja:"ja",ko:"ko",fr:"fr",es:"es",de:"de",ru:"ru"}[c]||c; }
-async function onlineTranslate(text,src,tgt){
-  const q=encodeURIComponent(text);
-  const url=`https://api.mymemory.translated.net/get?q=${q}&langpair=${mtCode(src)}|${mtCode(tgt)}`;
-  const r=await fetch(url); if(!r.ok) throw new Error("HTTP"+r.status);
-  const j=await r.json();
-  const res=j&&j.responseData&&j.responseData.translatedText;
-  if(!res) throw new Error("empty");
-  return res;
-}
-// 内置中英词典翻译（离线兜底）
-function offlineTranslate(text,src,tgt){
-  if((src==="zh"&&tgt==="en")||(src==="en"&&tgt==="zh")){
-    // 词/短语替换
-    const d=window.DICT||[];
-    let out=text;
-    if(src==="zh"){ for(const e of d){ if(e[0]&&text.includes(e[0])) out=out.split(e[0]).join(e[1]); } }
-    else{ for(const e of d){ if(e[1]&&text.includes(e[1])) out=out.split(e[1]).join(e[0]); } }
-    return out!==text?out:"";
+  /* ---------- 朗读 ---------- */
+  var synth = window.speechSynthesis;
+  var queue = [],
+    playing = false,
+    timer = null;
+  var transMap = []; // 翻译模式：每句 {src, tgt, srcLang, tgtLang}
+  function pickVoice(lang) {
+    var list = synth.getVoices();
+    var l = LBY[lang];
+    var prefs = l && l.speech || [lang];
+    var _iterator6 = _createForOfIteratorHelper(prefs),
+      _step6;
+    try {
+      var _loop = function _loop() {
+          var p = _step6.value;
+          var v = list.find(function (v) {
+            return v.lang.replace("_", "-").toLowerCase().startsWith(p.toLowerCase());
+          });
+          if (v) return {
+            v: v
+          };
+        },
+        _ret;
+      for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+        _ret = _loop();
+        if (_ret) return _ret.v;
+      }
+    } catch (err) {
+      _iterator6.e(err);
+    } finally {
+      _iterator6.f();
+    }
+    return null;
   }
-  return "";
-}
+  function speakText(text, lang, onEnd) {
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = LBY[lang] && LBY[lang].speech[0] || lang;
+    var v = pickVoice(lang);
+    if (v) u.voice = v;
+    u.rate = 0.95;
+    u.pitch = 1;
+    u.onend = function () {
+      return onEnd && onEnd();
+    };
+    u.onerror = function () {
+      return onEnd && onEnd();
+    };
+    synth.speak(u);
+    return u;
+  }
+  function stopSpeak() {
+    synth.cancel();
+    clearTimeout(timer);
+    queue = [];
+    playing = false;
+  }
 
-/* ---------- 渲染 ---------- */
-let currentMode="read";
-function modeOf(){ return currentMode; }
-function renderRead(sents){
-  result.style.display="block";
-  result.classList.remove("show-tr");
-  const lang=srcSel.value;
-  let html="";
-  sents.forEach((s,i)=>{
-    const ph=phonOf(lang,s);
-    html+=`<div class="sent" data-i="${i}">
-      <span class="idx">${i+1}</span>
-      <span class="speaker">🔊</span>
-      ${ph?`<div class="phon"></div>`:""}
-      <div class="orig">${escapeHtml(s)}</div>
-      <div class="trans"></div>
-    </div>`;
-  });
-  result.innerHTML=html;
-  // 填标音
-  if(sents.length){
-    result.querySelectorAll(".sent").forEach((el,i)=>{
-      const ph=phonOf(lang,sents[i]);
-      const pEl=el.querySelector(".phon");
-      if(ph && pEl) pEl.textContent=ph;
-      else if(pEl) pEl.remove();
-    });
-  }
-  if(sents.length===0) result.innerHTML=`<div class="empty">没有可朗读的句子</div>`;
-  // 绑定点击单句
-  result.querySelectorAll(".sent").forEach(el=>{
-    el.addEventListener("click",ev=>{
-      if(ev.target.classList.contains("speaker")){
-        stopSpeak(); const i=+el.dataset.i;
-        highlight(el); playing=true;
-        speakText(sents[i],srcSel.value,()=>{highlight(null);playing=false;});
+  /* 逐句朗读（带高亮） */
+  function playSentenceBySentence(sents, htmlEls, lang) {
+    stopSpeak();
+    queue = sents;
+    playing = true;
+    var i = 0;
+    var elArr = htmlEls || [];
+    function step() {
+      if (!playing || i >= queue.length) {
+        playing = false;
+        highlight(null);
         return;
       }
-      stopSpeak(); const i=+el.dataset.i; highlight(el);
-      playing=true;
-      speakText(sents[i],srcSel.value,()=>{highlight(null);playing=false;});
-    });
-  });
-  playRow.style.display="flex";
-  togglePhon();
-}
-function renderTrans(sents){
-  result.style.display="block";
-  result.classList.add("show-tr");
-  const lang=srcSel.value, tgt=tgtSel.value;
-  transMap=[];
-  let html="";
-  sents.forEach((s,i)=>{
-    html+=`<div class="sent" data-i="${i}"><span class="idx">${i+1}</span>
-      <div class="orig">${escapeHtml(s)}</div>
-      <div class="trans" data-role="trans" style="display:block;color:#8a6d3b;border-top:none;padding-top:6px">⏳ 翻译中…</div></div>`;
-    transMap.push({src:s, tgt:"", srcLang:lang, tgtLang:tgt});
-  });
-  result.innerHTML=html;
-  playRow.style.display="flex";
-  const els=[...result.querySelectorAll(".sent")];
-  els.forEach((el,i)=>{
-    transMap[i].el=el;
-    // 点击原文 → 朗读原文；点击译文 → 朗读译文
-    el.addEventListener("click",ev=>{
-      stopSpeak();
-      const item=transMap[i];
-      const isTrans=ev.target.classList.contains("trans");
-      const text=isTrans ? (item.tgt||item.src) : item.src;
-      const lang2=isTrans ? item.tgtLang : item.srcLang;
-      highlight(el); playing=true;
-      speakText(text,lang2,()=>{highlight(null);playing=false;});
-    });
-  });
-  sents.forEach((s,i)=>{
-    translateOne(s,lang,tgt).then(txt=>{
-      transMap[i].tgt=txt;
-      const tr=els[i].querySelector(".trans"); tr.textContent="🌍 "+txt;
-    }).catch(()=>{
-      const tr=els[i].querySelector(".trans"); tr.textContent="翻译失败（请检查网络或切换语言）";
-    });
-  });
-}
-async function translateOne(text,src,tgt){
-  if(!text) return "";
-  try{ const r=await onlineTranslate(text,src,tgt); if(r&&r.trim()) return r.trim(); }
-  catch(e){}
-  const off=offlineTranslate(text,src,tgt);
-  if(off) return off+"（离线词典）";
-  throw new Error("no result");
-}
-
-/* ---------- 工具 ---------- */
-function escapeHtml(s){ return s.replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m])); }
-function currentSents(){ return splitSents(input.value.trim()); }
-
-function togglePhon(){
-  const on=switchPhon.classList.contains("on");
-  result.querySelectorAll(".phon").forEach(e=>e.style.display=on?"":"none");
-}
-
-/* ---------- 语言下拉 ---------- */
-function fillSelects(keep){
-  srcSel.innerHTML=LANGS.map(l=>`<option value="${l.code}">${l.name}（${l.phon}）</option>`).join("");
-  tgtSel.innerHTML=LANGS.map(l=>`<option value="${l.code}">${l.name}</option>`).join("");
-  if(keep){ srcSel.value=keep.src; tgtSel.value=keep.tgt; }
-  else { srcSel.value="zh"; tgtSel.value="en"; }
-}
-// 目标语言默认排除源语言
-srcSel.addEventListener("change",()=>{
-  if(tgtSel.value===srcSel.value){
-    const alt=LANGS.find(l=>l.code!==srcSel.value); if(alt) tgtSel.value=alt.code;
+      highlight(elArr[i] || null);
+      speakText(queue[i], lang, function () {
+        if (!playing) return;
+        i++;
+        step();
+      });
+    }
+    step();
   }
-});
-
-/* ---------- 事件 ---------- */
-modePills.addEventListener("click",e=>{
-  const p=e.target.closest(".pill"); if(!p) return;
-  modePills.querySelectorAll(".pill").forEach(x=>x.classList.remove("on"));
-  p.classList.add("on"); currentMode=p.dataset.mode;
-});
-$("btnRun").addEventListener("click",runMain);
-function runMain(){
-  stopSpeak();
-  const s=currentSents();
-  if(!s.length){ status.textContent="⚠️ 请先输入或粘贴要学习的文字"; return; }
-  status.textContent="";
-  if(currentMode==="read") renderRead(s);
-  else renderTrans(s);
-}
-$("btnAll").addEventListener("click",()=>{
-  const s=currentSents(); if(!s.length) return;
-  const els=[...result.querySelectorAll(".sent")];
-  if(currentMode==="trans" && transMap.length){
-    const texts=transMap.map(x=>x.tgt||x.src);
-    const tlang=transMap[0].tgtLang;
-    status.textContent="🔊 朗读译文（目标语言）…（点击⏹停止）";
-    playSentenceBySentence(texts,els,tlang);
-  }else{
-    status.textContent="🔊 整段朗读中…（点击⏹停止）";
-    playSentenceBySentence(s,els,srcSel.value);
+  function highlight(el) {
+    result.querySelectorAll(".sent.active").forEach(function (e) {
+      return e.classList.remove("active");
+    });
+    if (el) el.classList.add("active");
+    var r = el && el.getBoundingClientRect();
+    if (el && r) {
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    }
   }
-});
-$("btnStop").addEventListener("click",()=>{ stopSpeak(); highlight(null); status.textContent="⏹ 已停止"; });
-switchPhon.addEventListener("click",()=>{ switchPhon.classList.toggle("on"); togglePhon(); });
-$("btnSample").addEventListener("click",()=>{
-  input.value="缤纷世界，美味多多。有人喜欢爽脆的苹果，有人喜欢多汁的橙子，而我最喜欢的是软糯香甜的香蕉。\n\nThe beautiful world is full of tasty things. Some like crisp apples, some like juicy oranges, but what I love most is the soft and sweet banana.";
-  status.textContent="已填入示例（中文→拼音，英文→IPA）。点击开始查看。";
-});
-$("btnClear").addEventListener("click",()=>{ input.value=""; result.style.display="none"; status.textContent=""; });
 
-// 语音列表就绪后可选
-if(synth && synth.onvoiceschanged!==undefined){ synth.onvoiceschanged=()=>{}; }
+  /* ---------- 翻译 ---------- */
+  function mtCode(c) {
+    return {
+      zh: "zh-CN",
+      yue: "zh-CN",
+      en: "en",
+      ja: "ja",
+      ko: "ko",
+      fr: "fr",
+      es: "es",
+      de: "de",
+      ru: "ru"
+    }[c] || c;
+  }
+  function onlineTranslate(_x, _x2, _x3) {
+    return _onlineTranslate.apply(this, arguments);
+  } // 内置中英词典翻译（离线兜底）
+  function _onlineTranslate() {
+    _onlineTranslate = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(text, src, tgt) {
+      var q, url, r, j, res;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.n) {
+          case 0:
+            q = encodeURIComponent(text);
+            url = "https://api.mymemory.translated.net/get?q=".concat(q, "&langpair=").concat(mtCode(src), "|").concat(mtCode(tgt));
+            _context.n = 1;
+            return fetch(url);
+          case 1:
+            r = _context.v;
+            if (r.ok) {
+              _context.n = 2;
+              break;
+            }
+            throw new Error("HTTP" + r.status);
+          case 2:
+            _context.n = 3;
+            return r.json();
+          case 3:
+            j = _context.v;
+            res = j && j.responseData && j.responseData.translatedText;
+            if (res) {
+              _context.n = 4;
+              break;
+            }
+            throw new Error("empty");
+          case 4:
+            return _context.a(2, res);
+        }
+      }, _callee);
+    }));
+    return _onlineTranslate.apply(this, arguments);
+  }
+  function offlineTranslate(text, src, tgt) {
+    if (src === "zh" && tgt === "en" || src === "en" && tgt === "zh") {
+      // 词/短语替换
+      var d = window.DICT || [];
+      var out = text;
+      if (src === "zh") {
+        var _iterator7 = _createForOfIteratorHelper(d),
+          _step7;
+        try {
+          for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+            var e = _step7.value;
+            if (e[0] && text.includes(e[0])) out = out.split(e[0]).join(e[1]);
+          }
+        } catch (err) {
+          _iterator7.e(err);
+        } finally {
+          _iterator7.f();
+        }
+      } else {
+        var _iterator8 = _createForOfIteratorHelper(d),
+          _step8;
+        try {
+          for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+            var _e = _step8.value;
+            if (_e[1] && text.includes(_e[1])) out = out.split(_e[1]).join(_e[0]);
+          }
+        } catch (err) {
+          _iterator8.e(err);
+        } finally {
+          _iterator8.f();
+        }
+      }
+      return out !== text ? out : "";
+    }
+    return "";
+  }
 
-// 初始
-fillSelects();
-$("sampleHint").textContent="试试：粘贴中/英/日/韩/法/西/德/俄文，选语言与模式，可整段朗读或点击句子单独朗读。";
+  /* ---------- 渲染 ---------- */
+  var currentMode = "read";
+  function modeOf() {
+    return currentMode;
+  }
+  function renderRead(sents) {
+    result.style.display = "block";
+    result.classList.remove("show-tr");
+    var lang = srcSel.value;
+    var html = "";
+    sents.forEach(function (s, i) {
+      var ph = phonOf(lang, s);
+      html += "<div class=\"sent\" data-i=\"".concat(i, "\">\n      <span class=\"idx\">").concat(i + 1, "</span>\n      <span class=\"speaker\">\uD83D\uDD0A</span>\n      ").concat(ph ? "<div class=\"phon\"></div>" : "", "\n      <div class=\"orig\">").concat(escapeHtml(s), "</div>\n      <div class=\"trans\"></div>\n    </div>");
+    });
+    result.innerHTML = html;
+    // 填标音
+    if (sents.length) {
+      result.querySelectorAll(".sent").forEach(function (el, i) {
+        var ph = phonOf(lang, sents[i]);
+        var pEl = el.querySelector(".phon");
+        if (ph && pEl) pEl.textContent = ph;else if (pEl) pEl.remove();
+      });
+    }
+    if (sents.length === 0) result.innerHTML = "<div class=\"empty\">\u6CA1\u6709\u53EF\u6717\u8BFB\u7684\u53E5\u5B50</div>";
+    // 绑定点击单句
+    result.querySelectorAll(".sent").forEach(function (el) {
+      el.addEventListener("click", function (ev) {
+        if (ev.target.classList.contains("speaker")) {
+          stopSpeak();
+          var _i = +el.dataset.i;
+          highlight(el);
+          playing = true;
+          speakText(sents[_i], srcSel.value, function () {
+            highlight(null);
+            playing = false;
+          });
+          return;
+        }
+        stopSpeak();
+        var i = +el.dataset.i;
+        highlight(el);
+        playing = true;
+        speakText(sents[i], srcSel.value, function () {
+          highlight(null);
+          playing = false;
+        });
+      });
+    });
+    playRow.style.display = "flex";
+    togglePhon();
+  }
+  function renderTrans(sents) {
+    result.style.display = "block";
+    result.classList.add("show-tr");
+    var lang = srcSel.value,
+      tgt = tgtSel.value;
+    transMap = [];
+    var html = "";
+    sents.forEach(function (s, i) {
+      html += "<div class=\"sent\" data-i=\"".concat(i, "\"><span class=\"idx\">").concat(i + 1, "</span>\n      <div class=\"orig\">").concat(escapeHtml(s), "</div>\n      <div class=\"trans\" data-role=\"trans\" style=\"display:block;color:#8a6d3b;border-top:none;padding-top:6px\">\u23F3 \u7FFB\u8BD1\u4E2D\u2026</div></div>");
+      transMap.push({
+        src: s,
+        tgt: "",
+        srcLang: lang,
+        tgtLang: tgt
+      });
+    });
+    result.innerHTML = html;
+    playRow.style.display = "flex";
+    var els = _toConsumableArray(result.querySelectorAll(".sent"));
+    els.forEach(function (el, i) {
+      transMap[i].el = el;
+      // 点击原文 → 朗读原文；点击译文 → 朗读译文
+      el.addEventListener("click", function (ev) {
+        stopSpeak();
+        var item = transMap[i];
+        var isTrans = ev.target.classList.contains("trans");
+        var text = isTrans ? item.tgt || item.src : item.src;
+        var lang2 = isTrans ? item.tgtLang : item.srcLang;
+        highlight(el);
+        playing = true;
+        speakText(text, lang2, function () {
+          highlight(null);
+          playing = false;
+        });
+      });
+    });
+    sents.forEach(function (s, i) {
+      translateOne(s, lang, tgt).then(function (txt) {
+        transMap[i].tgt = txt;
+        var tr = els[i].querySelector(".trans");
+        tr.textContent = "🌍 " + txt;
+      }).catch(function () {
+        var tr = els[i].querySelector(".trans");
+        tr.textContent = "翻译失败（请检查网络或切换语言）";
+      });
+    });
+  }
+  function translateOne(_x4, _x5, _x6) {
+    return _translateOne.apply(this, arguments);
+  }
+  /* ---------- 工具 ---------- */
+  function _translateOne() {
+    _translateOne = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(text, src, tgt) {
+      var r, off, _t;
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.p = _context2.n) {
+          case 0:
+            if (text) {
+              _context2.n = 1;
+              break;
+            }
+            return _context2.a(2, "");
+          case 1:
+            _context2.p = 1;
+            _context2.n = 2;
+            return onlineTranslate(text, src, tgt);
+          case 2:
+            r = _context2.v;
+            if (!(r && r.trim())) {
+              _context2.n = 3;
+              break;
+            }
+            return _context2.a(2, r.trim());
+          case 3:
+            _context2.n = 5;
+            break;
+          case 4:
+            _context2.p = 4;
+            _t = _context2.v;
+          case 5:
+            off = offlineTranslate(text, src, tgt);
+            if (!off) {
+              _context2.n = 6;
+              break;
+            }
+            return _context2.a(2, off + "（离线词典）");
+          case 6:
+            throw new Error("no result");
+          case 7:
+            return _context2.a(2);
+        }
+      }, _callee2, null, [[1, 4]]);
+    }));
+    return _translateOne.apply(this, arguments);
+  }
+  function escapeHtml(s) {
+    return s.replace(/[&<>"]/g, function (m) {
+      return {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;"
+      }[m];
+    });
+  }
+  function currentSents() {
+    return splitSents(input.value.trim());
+  }
+  function togglePhon() {
+    var on = switchPhon.classList.contains("on");
+    result.querySelectorAll(".phon").forEach(function (e) {
+      return e.style.display = on ? "" : "none";
+    });
+  }
+
+  /* ---------- 语言下拉 ---------- */
+  function fillSelects(keep) {
+    srcSel.innerHTML = LANGS.map(function (l) {
+      return "<option value=\"".concat(l.code, "\">").concat(l.name, "\uFF08").concat(l.phon, "\uFF09</option>");
+    }).join("");
+    tgtSel.innerHTML = LANGS.map(function (l) {
+      return "<option value=\"".concat(l.code, "\">").concat(l.name, "</option>");
+    }).join("");
+    if (keep) {
+      srcSel.value = keep.src;
+      tgtSel.value = keep.tgt;
+    } else {
+      srcSel.value = "zh";
+      tgtSel.value = "en";
+    }
+  }
+  // 目标语言默认排除源语言
+  srcSel.addEventListener("change", function () {
+    if (tgtSel.value === srcSel.value) {
+      var alt = LANGS.find(function (l) {
+        return l.code !== srcSel.value;
+      });
+      if (alt) tgtSel.value = alt.code;
+    }
+  });
+
+  /* ---------- 事件 ---------- */
+  modePills.addEventListener("click", function (e) {
+    var p = e.target.closest(".pill");
+    if (!p) return;
+    modePills.querySelectorAll(".pill").forEach(function (x) {
+      return x.classList.remove("on");
+    });
+    p.classList.add("on");
+    currentMode = p.dataset.mode;
+  });
+  $("btnRun").addEventListener("click", runMain);
+  function runMain() {
+    stopSpeak();
+    var s = currentSents();
+    if (!s.length) {
+      status.textContent = "⚠️ 请先输入或粘贴要学习的文字";
+      return;
+    }
+    status.textContent = "";
+    if (currentMode === "read") renderRead(s);else renderTrans(s);
+  }
+  $("btnAll").addEventListener("click", function () {
+    var s = currentSents();
+    if (!s.length) return;
+    var els = _toConsumableArray(result.querySelectorAll(".sent"));
+    if (currentMode === "trans" && transMap.length) {
+      var texts = transMap.map(function (x) {
+        return x.tgt || x.src;
+      });
+      var tlang = transMap[0].tgtLang;
+      status.textContent = "🔊 朗读译文（目标语言）…（点击⏹停止）";
+      playSentenceBySentence(texts, els, tlang);
+    } else {
+      status.textContent = "🔊 整段朗读中…（点击⏹停止）";
+      playSentenceBySentence(s, els, srcSel.value);
+    }
+  });
+  $("btnStop").addEventListener("click", function () {
+    stopSpeak();
+    highlight(null);
+    status.textContent = "⏹ 已停止";
+  });
+  switchPhon.addEventListener("click", function () {
+    switchPhon.classList.toggle("on");
+    togglePhon();
+  });
+  $("btnSample").addEventListener("click", function () {
+    input.value = "缤纷世界，美味多多。有人喜欢爽脆的苹果，有人喜欢多汁的橙子，而我最喜欢的是软糯香甜的香蕉。\n\nThe beautiful world is full of tasty things. Some like crisp apples, some like juicy oranges, but what I love most is the soft and sweet banana.";
+    status.textContent = "已填入示例（中文→拼音，英文→IPA）。点击开始查看。";
+  });
+  $("btnClear").addEventListener("click", function () {
+    input.value = "";
+    result.style.display = "none";
+    status.textContent = "";
+  });
+
+  // 语音列表就绪后可选
+  if (synth && synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = function () {};
+  }
+
+  // 初始
+  fillSelects();
+  $("sampleHint").textContent = "试试：粘贴中/英/日/韩/法/西/德/俄文，选语言与模式，可整段朗读或点击句子单独朗读。";
 })();
-
 </script>
 <script>
   // 注册离线缓存（HTTPS/本地部署生效；File 协议下自动忽略）
