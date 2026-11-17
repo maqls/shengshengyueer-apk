@@ -173,6 +173,7 @@ window.DICT = [
 ];
 
 </script>
+<script src="libs.js"></script>
 <script>
 function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var r, e, o = "function" == typeof Symbol ? Symbol : {}, n = o.iterator || "@@iterator", a = o.toStringTag || "@@toStringTag"; function i(o, n, a, i) { var u = n && n.prototype instanceof Generator ? n : Generator, f = Object.create(u.prototype); return _regeneratorDefine2(f, "_invoke", function (t, o, n) { var a, i, u, f = 0, p = n || [], y = !1, G = { p: 0, n: 0, v: r, a: l, f: l.bind(r, 4), d: function d(t, e) { return a = t, i = 0, u = r, G.n = e, c; } }; function l(t, o) { for (i = t, u = o, e = 0; !y && f && !n && e < p.length; e++) { var n, a = p[e], l = G.p, F = a[2]; t > 3 ? (n = F === o) && (u = a[(i = a[4]) ? 5 : (i = 3, 3)], a[4] = a[5] = r) : a[0] <= l && ((n = t < 2 && l < a[1]) ? (i = 0, G.v = o, G.n = a[1]) : l < F && (n = t < 3 || a[0] > o || o > F) && (a[4] = t, a[5] = o, G.n = F, i = 0)); } if (n || t > 1) return c; throw y = !0, o; } return function (n, p, F) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && l(p, F), i = p, u = F; (e = i < 2 ? r : u) || !y;) { a || (i ? (i > 1 && (G.n = i < 3 ? -1 : u), l(i, u)) : G.v = u); try { if (f = 2, a) { if (i || (n = "next"), e = a[n]) { if (!(e = e.call(a, u))) throw TypeError("iterator result is not an object"); if (!e.done) return e; u = e.value, i < 2 && (i = 0); } else 1 === i && (e = a.return) && e.call(a), i < 2 && (u = TypeError("The iterator does not provide a '" + n + "' method"), i = 1); a = r; } else if ((e = (y = G.n < 0) ? u : t.call(o, G)) !== c) break; } catch (t) { a = r, i = 1, u = t; } finally { f = 1; } } return { value: e, done: y }; }; }(o, a, i), !0), f; } var c = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} e = Object.getPrototypeOf; var u = [][n] ? e(e([][n]())) : (_regeneratorDefine2(e = {}, n, function () { return this; }), e), f = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(u); function p(r) { return Object.setPrototypeOf ? Object.setPrototypeOf(r, GeneratorFunctionPrototype) : (r.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(r, a, "GeneratorFunction")), r.prototype = Object.create(f), r; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(f, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, a, "GeneratorFunction"), _regeneratorDefine2(f), _regeneratorDefine2(f, a, "Generator"), _regeneratorDefine2(f, n, function () { return this; }), _regeneratorDefine2(f, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: p }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
@@ -299,13 +300,37 @@ if (!Array.prototype.includes) {
 
   // 中文 拼音（逐字，标点/非汉字保留空格）
   function phonChinese(t) {
+    if (window.PinyinPro) {
+      try {
+        var arr = window.PinyinPro.pinyin(t, {
+          type: "array",
+          toneType: "symbol",
+          nonZh: "consecutive"
+        });
+        return arr.map(function (x) {
+          return /[a-zA-Z\u00c0-\u024f]/.test(x) ? x : "";
+        }).join(" ").replace(/\s+/g, " ").trim();
+      } catch (e) {}
+    }
     return _toConsumableArray(t).map(function (ch) {
       if (/[\u4e00-\u9fff]/.test(ch)) return PY[ch] || "";
-      return ""; // 标点不标音
+      return "";
     }).join(" ").replace(/\s+/g, " ").trim();
   }
   // 粤语 粤拼（逐字）
   function phonYue(t) {
+    if (window.toJyutping) {
+      try {
+        return _toConsumableArray(t).map(function (ch) {
+          if (/[\u4e00-\u9fff]/.test(ch)) {
+            var j = window.toJyutping.getJyutping(ch);
+            var m = j && j.match(/\(([^)]+)\)/);
+            return m ? m[1] : j || "";
+          }
+          return "";
+        }).join(" ").replace(/\s+/g, " ").trim();
+      } catch (e) {}
+    }
     return _toConsumableArray(t).map(function (ch) {
       if (/[\u4e00-\u9fff]/.test(ch)) return YUE[ch] || "";
       return "";
@@ -1089,14 +1114,6 @@ if (!Array.prototype.includes) {
     }
     return days[d.getUTCDay()] + " " + mons[d.getUTCMonth()] + " " + p2(d.getUTCDate()) + " " + d.getUTCFullYear() + " " + p2(d.getUTCHours()) + ":" + p2(d.getUTCMinutes()) + ":" + p2(d.getUTCSeconds()) + " GMT+0000 (Coordinated Universal Time)";
   }
-  function toCantonese(s) {
-    if (!s) return s;
-    var m = [["在吃什么", "喺食紧咩"], ["在干什么", "喺度做咩"], ["在做什么", "喺度做咩"], ["在干什么", "喺度做咩"], ["在哪儿", "喺边度"], ["在哪里", "喺边度"], ["为什么", "点解"], ["怎么样", "点样"], ["干什么", "做咩"], ["做什么", "做咩"], ["什么", "咩"], ["吃饭", "食饭"], ["喝水", "饮水"], ["喝茶", "饮茶"], ["吃", "食"], ["喝", "饮"], ["我们", "我哋"], ["你们", "你哋"], ["他们", "佢哋"], ["她们", "佢哋"], ["咱们", "我哋"], ["不是", "唔系"], ["不要", "唔好"], ["没有", "冇"], ["不用", "唔使"], ["不会", "唔会"], ["不能", "唔可以"], ["是", "系"], ["不", "唔"], ["他", "佢"], ["她", "佢"], ["这", "呢"], ["那", "嗰"], ["谢谢", "多谢"], ["对不起", "对唔住"], ["再见", "拜拜"], ["很", "好"], ["的", "嘅"]];
-    for (var i = 0; i < m.length; i++) {
-      s = s.split(m[i][0]).join(m[i][1]);
-    }
-    return s;
-  }
   function edgeSpeak(text, voice, cb) {
     var done = false,
       ws = null;
@@ -1283,7 +1300,8 @@ if (!Array.prototype.includes) {
           } catch (e) {}
         }
         var tries = 0;
-        var speakTxt = lang === "yue" ? toCantonese(text) : text;
+        var speakTxt = text;
+        var YUE_RE = /[喺咩嘅哋唔咗佢睇冇嚟啲嘢嗰咁噉嚿]/;
         function tryEdge() {
           tries++;
           edgeSpeak(speakTxt, msV, function (u, reason) {
@@ -1302,7 +1320,27 @@ if (!Array.prototype.includes) {
             }
           });
         }
-        tryEdge();
+        if (lang === "yue" && !YUE_RE.test(text)) {
+          if (typeof status !== "undefined" && status) {
+            try {
+              status.textContent = "正在合成粤语语音…";
+            } catch (e) {}
+          }
+          baiduTr(text, "zh", "yue").then(function (yt) {
+            speakTxt = yt || text;
+            tryEdge();
+          }).catch(function () {
+            speakTxt = text;
+            tryEdge();
+          });
+        } else {
+          if (typeof status !== "undefined" && status) {
+            try {
+              status.textContent = "正在合成语音…";
+            } catch (e) {}
+          }
+          tryEdge();
+        }
       } else {
         baiduGo();
       }
@@ -1371,13 +1409,13 @@ if (!Array.prototype.includes) {
   /* ---------- 翻译 ---------- */
   function mtCode(c) {
     return {
-      zh: "zh-CN",
-      yue: "zh-CN",
+      zh: "zh",
+      yue: "yue",
       en: "en",
-      ja: "ja",
-      ko: "ko",
-      fr: "fr",
-      es: "es",
+      ja: "jp",
+      ko: "kor",
+      fr: "fra",
+      es: "spa",
       de: "de",
       ru: "ru"
     }[c] || c;
@@ -1392,21 +1430,21 @@ if (!Array.prototype.includes) {
     return _httpJson.apply(this, arguments);
   }
   function _httpJson() {
-    _httpJson = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(url, opts) {
-      var CH, r, fr, _t, _t2, _t3;
-      return _regenerator().w(function (_context) {
-        while (1) switch (_context.p = _context.n) {
+    _httpJson = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(url, opts) {
+      var CH, r, fr, _t2, _t3, _t4;
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.p = _context2.n) {
           case 0:
             CH = xhrCap();
             if (!(CH && (CH.get || CH.post))) {
-              _context.n = 8;
+              _context2.n = 8;
               break;
             }
             if (!(opts && opts.post)) {
-              _context.n = 2;
+              _context2.n = 2;
               break;
             }
-            _context.n = 1;
+            _context2.n = 1;
             return CH.post({
               url: url,
               headers: {
@@ -1416,121 +1454,134 @@ if (!Array.prototype.includes) {
               responseType: "json"
             });
           case 1:
-            r = _context.v;
-            _context.n = 4;
+            r = _context2.v;
+            _context2.n = 4;
             break;
           case 2:
-            _context.n = 3;
+            _context2.n = 3;
             return CH.get({
               url: url,
               responseType: "json"
             });
           case 3:
-            r = _context.v;
+            r = _context2.v;
           case 4:
             if (!(r && typeof r.data === "string")) {
-              _context.n = 7;
+              _context2.n = 7;
               break;
             }
-            _context.p = 5;
-            return _context.a(2, JSON.parse(r.data));
+            _context2.p = 5;
+            return _context2.a(2, JSON.parse(r.data));
           case 6:
-            _context.p = 6;
-            _t = _context.v;
+            _context2.p = 6;
+            _t2 = _context2.v;
           case 7:
-            return _context.a(2, r && r.data);
+            return _context2.a(2, r && r.data);
           case 8:
-            _context.p = 8;
+            _context2.p = 8;
             if (!(opts && opts.post)) {
-              _context.n = 10;
+              _context2.n = 10;
               break;
             }
-            _context.n = 9;
+            _context2.n = 9;
             return fetch(url, {
               method: "POST",
               body: opts.body
             });
           case 9:
-            _t2 = _context.v;
-            _context.n = 12;
+            _t3 = _context2.v;
+            _context2.n = 12;
             break;
           case 10:
-            _context.n = 11;
+            _context2.n = 11;
             return fetch(url);
           case 11:
-            _t2 = _context.v;
+            _t3 = _context2.v;
           case 12:
-            fr = _t2;
-            _context.n = 14;
+            fr = _t3;
+            _context2.n = 14;
             break;
           case 13:
-            _context.p = 13;
-            _t3 = _context.v;
-            throw _t3;
+            _context2.p = 13;
+            _t4 = _context2.v;
+            throw _t4;
           case 14:
-            _context.n = 15;
+            _context2.n = 15;
             return fr.json();
           case 15:
-            return _context.a(2, _context.v);
+            return _context2.a(2, _context2.v);
         }
-      }, _callee, null, [[8, 13], [5, 6]]);
+      }, _callee2, null, [[8, 13], [5, 6]]);
     }));
     return _httpJson.apply(this, arguments);
   }
-  function onlineTranslate(_x3, _x4, _x5) {
+  var BAIDU_APPID = "20261117002719114",
+    BAIDU_KEY = "OGfhhJhM2aWoOjSe8Wdb";
+  function baiduLang(c) {
+    return {
+      zh: "zh",
+      yue: "yue",
+      en: "en",
+      ja: "jp",
+      ko: "kor",
+      fr: "fra",
+      es: "spa",
+      de: "de",
+      ru: "ru"
+    }[c] || c;
+  }
+  function baiduSign(q, salt) {
+    var f = window.md5 || function () {
+      return "";
+    };
+    return f(BAIDU_APPID + q + salt + BAIDU_KEY);
+  }
+  function baiduTr(_x3, _x4, _x5) {
+    return _baiduTr.apply(this, arguments);
+  }
+  function _baiduTr() {
+    _baiduTr = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(text, src, tgt) {
+      var salt, sign, url, j;
+      return _regenerator().w(function (_context3) {
+        while (1) switch (_context3.n) {
+          case 0:
+            salt = String(Math.floor(Math.random() * 90000) + 10000);
+            sign = baiduSign(text, salt);
+            url = "https://fanyi-api.baidu.com/api/trans/vip/translate?q=" + encodeURIComponent(text) + "&from=" + baiduLang(src) + "&to=" + baiduLang(tgt) + "&appid=" + BAIDU_APPID + "&salt=" + salt + "&sign=" + sign;
+            _context3.n = 1;
+            return httpJson(url);
+          case 1:
+            j = _context3.v;
+            if (!(j && j.trans_result && j.trans_result.length)) {
+              _context3.n = 2;
+              break;
+            }
+            return _context3.a(2, j.trans_result.map(function (x) {
+              return x.dst;
+            }).join("\n"));
+          case 2:
+            throw new Error(j && j.error_code ? "baidu " + j.error_code + " " + (j.error_msg || "") : j && j.error_msg || "empty");
+          case 3:
+            return _context3.a(2);
+        }
+      }, _callee3);
+    }));
+    return _baiduTr.apply(this, arguments);
+  }
+  function onlineTranslate(_x6, _x7, _x8) {
     return _onlineTranslate.apply(this, arguments);
   } // 内置中英词典翻译（离线兜底）
   function _onlineTranslate() {
-    _onlineTranslate = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(text, src, tgt) {
-      var j2, v, q, url, j, res, _t4;
-      return _regenerator().w(function (_context2) {
-        while (1) switch (_context2.p = _context2.n) {
+    _onlineTranslate = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(text, src, tgt) {
+      return _regenerator().w(function (_context4) {
+        while (1) switch (_context4.n) {
           case 0:
-            if (!(src === "zh" && tgt === "en" && text.length <= 15)) {
-              _context2.n = 5;
-              break;
-            }
-            _context2.p = 1;
-            _context2.n = 2;
-            return httpJson("https://fanyi.baidu.com/sug", {
-              post: true,
-              body: "kw=" + encodeURIComponent(text)
-            });
-          case 2:
-            j2 = _context2.v;
-            if (!(j2 && j2.data && j2.data.length)) {
-              _context2.n = 3;
-              break;
-            }
-            v = j2.data[0].v;
-            if (!(v && v !== text)) {
-              _context2.n = 3;
-              break;
-            }
-            return _context2.a(2, v);
-          case 3:
-            _context2.n = 5;
-            break;
-          case 4:
-            _context2.p = 4;
-            _t4 = _context2.v;
-          case 5:
-            q = encodeURIComponent(text);
-            url = "https://api.mymemory.translated.net/get?q=".concat(q, "&langpair=").concat(mtCode(src), "|").concat(mtCode(tgt));
-            _context2.n = 6;
-            return httpJson(url);
-          case 6:
-            j = _context2.v;
-            res = j && j.responseData && j.responseData.translatedText;
-            if (res) {
-              _context2.n = 7;
-              break;
-            }
-            throw new Error("empty");
-          case 7:
-            return _context2.a(2, res);
+            _context4.n = 1;
+            return baiduTr(text, src, tgt);
+          case 1:
+            return _context4.a(2, _context4.v);
         }
-      }, _callee2, null, [[1, 4]]);
+      }, _callee4);
     }));
     return _onlineTranslate.apply(this, arguments);
   }
@@ -1680,78 +1731,116 @@ if (!Array.prototype.includes) {
         });
       });
     });
-    var sameSys = mtCode(lang) === mtCode(tgt);
-    sents.forEach(function (s, i) {
-      if (sameSys) {
-        els[i].querySelector(".trans").textContent = "🌍 同属中文，无需翻译（可点🔊听读音）";
-        return;
-      }
-      translateOne(s, lang, tgt).then(function (txt) {
-        transMap[i].tgt = txt;
-        var tr = els[i].querySelector(".trans");
-        tr.innerHTML = "🌍 " + wrapUnits(txt, tgt);
-        tr.querySelectorAll(".unit").forEach(function (u) {
-          u.addEventListener("click", function (ev) {
-            ev.stopPropagation();
-            stopSpeak();
-            highlight(els[i]);
-            playing = true;
-            speakText(u.textContent, tgt, function () {
-              playing = false;
+    var sameSys = lang === tgt;
+    _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
+      var i, txt, tr, _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
+          case 0:
+            i = 0;
+          case 1:
+            if (!(i < sents.length)) {
+              _context.n = 7;
+              break;
+            }
+            if (!sameSys) {
+              _context.n = 2;
+              break;
+            }
+            els[i].querySelector(".trans").textContent = "🌍 请选择不同的目标语言";
+            return _context.a(3, 6);
+          case 2:
+            _context.p = 2;
+            _context.n = 3;
+            return translateOne(sents[i], lang, tgt);
+          case 3:
+            txt = _context.v;
+            transMap[i].tgt = txt;
+            tr = els[i].querySelector(".trans");
+            tr.innerHTML = "🌍 " + wrapUnits(txt, tgt);
+            (function (tr2, idx) {
+              tr2.querySelectorAll(".unit").forEach(function (u) {
+                u.addEventListener("click", function (ev) {
+                  ev.stopPropagation();
+                  stopSpeak();
+                  highlight(els[idx]);
+                  playing = true;
+                  speakText(u.textContent, tgt, function () {
+                    playing = false;
+                  });
+                });
+              });
+            })(tr, i);
+            _context.n = 5;
+            break;
+          case 4:
+            _context.p = 4;
+            _t = _context.v;
+            els[i].querySelector(".trans").textContent = "翻译失败（" + (_t && _t.message || "网络") + "）";
+          case 5:
+            if (!(i < sents.length - 1)) {
+              _context.n = 6;
+              break;
+            }
+            _context.n = 6;
+            return new Promise(function (r) {
+              setTimeout(r, 320);
             });
-          });
-        });
-      }).catch(function () {
-        var tr = els[i].querySelector(".trans");
-        tr.textContent = "翻译失败（请检查网络或切换语言）";
-      });
-    });
+          case 6:
+            i++;
+            _context.n = 1;
+            break;
+          case 7:
+            return _context.a(2);
+        }
+      }, _callee, null, [[2, 4]]);
+    }))();
   }
-  function translateOne(_x6, _x7, _x8) {
+  function translateOne(_x9, _x0, _x1) {
     return _translateOne.apply(this, arguments);
   }
   /* ---------- 工具 ---------- */
   function _translateOne() {
-    _translateOne = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(text, src, tgt) {
+    _translateOne = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee5(text, src, tgt) {
       var r, off, _t5;
-      return _regenerator().w(function (_context3) {
-        while (1) switch (_context3.p = _context3.n) {
+      return _regenerator().w(function (_context5) {
+        while (1) switch (_context5.p = _context5.n) {
           case 0:
             if (text) {
-              _context3.n = 1;
+              _context5.n = 1;
               break;
             }
-            return _context3.a(2, "");
+            return _context5.a(2, "");
           case 1:
-            _context3.p = 1;
-            _context3.n = 2;
+            _context5.p = 1;
+            _context5.n = 2;
             return onlineTranslate(text, src, tgt);
           case 2:
-            r = _context3.v;
+            r = _context5.v;
             if (!(r && r.trim())) {
-              _context3.n = 3;
+              _context5.n = 3;
               break;
             }
-            return _context3.a(2, r.trim());
+            return _context5.a(2, r.trim());
           case 3:
-            _context3.n = 5;
+            _context5.n = 5;
             break;
           case 4:
-            _context3.p = 4;
-            _t5 = _context3.v;
+            _context5.p = 4;
+            _t5 = _context5.v;
           case 5:
             off = offlineTranslate(text, src, tgt);
             if (!off) {
-              _context3.n = 6;
+              _context5.n = 6;
               break;
             }
-            return _context3.a(2, off + "（离线词典）");
+            return _context5.a(2, off + "（离线词典）");
           case 6:
             throw new Error("no result");
           case 7:
-            return _context3.a(2);
+            return _context5.a(2);
         }
-      }, _callee3, null, [[1, 4]]);
+      }, _callee5, null, [[1, 4]]);
     }));
     return _translateOne.apply(this, arguments);
   }
