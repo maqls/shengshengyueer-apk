@@ -58,6 +58,8 @@
     border:1px solid var(--line);position:relative;cursor:pointer;transition:.15s;}
   .reading .sent.active{background:#fff7e2;border-color:var(--accent);box-shadow:0 2px 10px rgba(224,169,44,.25);}
   .reading .phon{font-size:13px;color:#b07a1e;margin-bottom:4px;color:#c08a2a;line-height:1.6;}
+  .show-tr .phon{font-size:13px;color:#c08a2a;line-height:1.6;margin:2px 0;}
+  .show-tr .phon.ph-trans{color:#8a6d3b;}
   .reading .orig{font-size:19px;line-height:1.9;}
   .reading .sent .idx{position:absolute;top:8px;right:12px;font-size:11px;color:#cfc6b4;}
   .trans{color:#4a7057;margin-top:6px;padding-top:6px;border-top:1px dashed var(--line);
@@ -1335,27 +1337,12 @@ if (!Array.prototype.includes) {
             }
           });
         }
-        if (lang === "yue" && !YUE_RE.test(text)) {
-          if (typeof status !== "undefined" && status) {
-            try {
-              status.textContent = "正在合成粤语语音…";
-            } catch (e) {}
-          }
-          baiduTr(text, "zh", "yue").then(function (yt) {
-            speakTxt = yt || text;
-            tryEdge();
-          }).catch(function () {
-            speakTxt = text;
-            tryEdge();
-          });
-        } else {
-          if (typeof status !== "undefined" && status) {
-            try {
-              status.textContent = "正在合成语音…";
-            } catch (e) {}
-          }
-          tryEdge();
+        if (typeof status !== "undefined" && status) {
+          try {
+            status.textContent = lang === "yue" ? "正在合成粤语语音…" : "正在合成语音…";
+          } catch (e) {}
         }
+        tryEdge();
       } else {
         baiduGo();
       }
@@ -1880,8 +1867,11 @@ if (!Array.prototype.includes) {
       tgt = tgtSel.value;
     transMap = [];
     var html = "";
+    var showPh = switchPhon.classList.contains("on");
+    var phDisp = showPh ? "" : "none";
     sents.forEach(function (s, i) {
-      html += "<div class=\"sent\" data-i=\"".concat(i, "\"><span class=\"idx\">").concat(i + 1, "</span>\n      <div class=\"orig\">").concat(wrapUnits(s, lang), "</div>\n      <div class=\"trans\" data-role=\"trans\" style=\"display:block;color:#8a6d3b;border-top:none;padding-top:6px\">\u23F3 \u7FFB\u8BD1\u4E2D\u2026</div></div>");
+      var phS = phonOf(lang, s);
+      html += "<div class=\"sent\" data-i=\"".concat(i, "\"><span class=\"idx\">").concat(i + 1, "</span>\n      <div class=\"phon\" style=\"display:").concat(phDisp, "\">").concat(phS ? escapeHtml(phS) : "", "</div>\n      <div class=\"orig\">").concat(wrapUnits(s, lang), "</div>\n      <div class=\"phon ph-trans\" style=\"display:").concat(phDisp, "\"></div>\n      <div class=\"trans\" data-role=\"trans\" style=\"display:block;color:#8a6d3b;border-top:none;padding-top:6px\">\u23F3 \u7FFB\u8BD1\u4E2D\u2026</div></div>");
       transMap.push({
         src: s,
         tgt: "",
@@ -1922,7 +1912,7 @@ if (!Array.prototype.includes) {
     });
     var sameSys = lang === tgt;
     _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee() {
-      var i, txt, tr, _t;
+      var i, txt, tr, pt, pe, _t;
       return _regenerator().w(function (_context) {
         while (1) switch (_context.p = _context.n) {
           case 0:
@@ -1947,6 +1937,13 @@ if (!Array.prototype.includes) {
             transMap[i].tgt = txt;
             tr = els[i].querySelector(".trans");
             tr.innerHTML = "🌍 " + wrapUnits(txt, tgt);
+            pt = phonOf(tgt, txt);
+            pe = els[i].querySelector(".ph-trans");
+            if (pt) {
+              if (pe) pe.textContent = pt;
+            } else if (pe) {
+              pe.remove();
+            }
             (function (tr2, idx) {
               tr2.querySelectorAll(".unit").forEach(function (u) {
                 u.addEventListener("click", function (ev) {
