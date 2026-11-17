@@ -51,6 +51,15 @@ jobs:
               print('polyfill already present ->', p)
           PY
 
+      - name: Inject Aliyun API keys
+        env:
+          ALI_AK: ${{ secrets.ALI_AK }}
+          ALI_SK: ${{ secrets.ALI_SK }}
+        run: |
+          sed -i "s/__ALI_AK__/${ALI_AK}/g" www/index.html
+          sed -i "s/__ALI_SK__/${ALI_SK}/g" www/index.html
+          if grep -q '__ALI_SK__' www/index.html; then echo 'WARN: key not injected (secret missing?)'; fi
+
       - name: Sync Capacitor
         run: npx cap sync android
 
