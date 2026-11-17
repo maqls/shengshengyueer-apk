@@ -1219,11 +1219,6 @@ if (!Array.prototype.includes) {
           de: "de",
           ru: "ru"
         }[lang] || "zh";
-        if (lang === "yue" && typeof status !== "undefined" && status) {
-          try {
-            status.textContent = "ℹ️ 粤语语音暂缺，先用普通话代读";
-          } catch (e) {}
-        }
         var url = "https://fanyi.baidu.com/gettts?lan=" + le + "&text=" + encodeURIComponent(text) + "&spd=4&source=web";
         var CH = null;
         try {
@@ -1275,6 +1270,7 @@ if (!Array.prototype.includes) {
               tryEdge();
             } else {
               var m = reason === "TIMEOUT" ? "连接微软粤语语音超时" : reason === "WSERROR" ? "连接微软粤语语音失败" : reason === "CLOSED" ? "粤语语音连接被关闭" : "粤语语音连接失败(" + (reason || "未知") + ")";
+              m += "｜UA:" + (navigator.userAgent || "").slice(0, 42);
               if (typeof status !== "undefined" && status) {
                 try {
                   status.textContent = "⚠️ " + m + "，已用普通话代读";
