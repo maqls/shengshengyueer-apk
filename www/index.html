@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
+<head><script>window.onerror=function(m,s,l,c,e){try{var d=document.getElementById("__err");if(!d){d=document.createElement("div");d.id="__err";d.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#c00;color:#fff;font-size:12px;padding:6px;white-space:pre-wrap;max-height:45%;overflow:auto";document.documentElement.appendChild(d);}d.textContent+="ERR: "+m+" @"+l+":"+c+"\n";}catch(x){}return false;};window.addEventListener("unhandledrejection",function(e){try{var d=document.getElementById("__err");if(!d){d=document.createElement("div");d.id="__err";d.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#c00;color:#fff;font-size:12px;padding:6px;white-space:pre-wrap";document.documentElement.appendChild(d);}d.textContent+="PROMISE: "+((e.reason&&e.reason.message)||e.reason)+"\n";}catch(x){}});</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>多语朗读 · 标音 · 翻译 学习助手</title>
@@ -1360,41 +1360,155 @@ if (!Array.prototype.includes) {
       ru: "ru"
     }[c] || c;
   }
-  function onlineTranslate(_x, _x2, _x3) {
-    return _onlineTranslate.apply(this, arguments);
-  } // 内置中英词典翻译（离线兜底）
-  function _onlineTranslate() {
-    _onlineTranslate = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(text, src, tgt) {
-      var q, url, r, j, res;
+  function xhrCap() {
+    try {
+      if (window.Capacitor) return window.Capacitor.CapacitorHttp || window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorHttp || null;
+    } catch (e) {}
+    return null;
+  }
+  function httpJson(_x, _x2) {
+    return _httpJson.apply(this, arguments);
+  }
+  function _httpJson() {
+    _httpJson = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(url, opts) {
+      var CH, r, fr, _t, _t2, _t3;
       return _regenerator().w(function (_context) {
-        while (1) switch (_context.n) {
+        while (1) switch (_context.p = _context.n) {
           case 0:
-            q = encodeURIComponent(text);
-            url = "https://api.mymemory.translated.net/get?q=".concat(q, "&langpair=").concat(mtCode(src), "|").concat(mtCode(tgt));
-            _context.n = 1;
-            return fetch(url);
-          case 1:
-            r = _context.v;
-            if (r.ok) {
+            CH = xhrCap();
+            if (!(CH && (CH.get || CH.post))) {
+              _context.n = 8;
+              break;
+            }
+            if (!(opts && opts.post)) {
               _context.n = 2;
               break;
             }
-            throw new Error("HTTP" + r.status);
+            _context.n = 1;
+            return CH.post({
+              url: url,
+              headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+              },
+              data: opts.body,
+              responseType: "json"
+            });
+          case 1:
+            r = _context.v;
+            _context.n = 4;
+            break;
           case 2:
             _context.n = 3;
-            return r.json();
+            return CH.get({
+              url: url,
+              responseType: "json"
+            });
           case 3:
-            j = _context.v;
+            r = _context.v;
+          case 4:
+            if (!(r && typeof r.data === "string")) {
+              _context.n = 7;
+              break;
+            }
+            _context.p = 5;
+            return _context.a(2, JSON.parse(r.data));
+          case 6:
+            _context.p = 6;
+            _t = _context.v;
+          case 7:
+            return _context.a(2, r && r.data);
+          case 8:
+            _context.p = 8;
+            if (!(opts && opts.post)) {
+              _context.n = 10;
+              break;
+            }
+            _context.n = 9;
+            return fetch(url, {
+              method: "POST",
+              body: opts.body
+            });
+          case 9:
+            _t2 = _context.v;
+            _context.n = 12;
+            break;
+          case 10:
+            _context.n = 11;
+            return fetch(url);
+          case 11:
+            _t2 = _context.v;
+          case 12:
+            fr = _t2;
+            _context.n = 14;
+            break;
+          case 13:
+            _context.p = 13;
+            _t3 = _context.v;
+            throw _t3;
+          case 14:
+            _context.n = 15;
+            return fr.json();
+          case 15:
+            return _context.a(2, _context.v);
+        }
+      }, _callee, null, [[8, 13], [5, 6]]);
+    }));
+    return _httpJson.apply(this, arguments);
+  }
+  function onlineTranslate(_x3, _x4, _x5) {
+    return _onlineTranslate.apply(this, arguments);
+  } // 内置中英词典翻译（离线兜底）
+  function _onlineTranslate() {
+    _onlineTranslate = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(text, src, tgt) {
+      var j2, v, q, url, j, res, _t4;
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.p = _context2.n) {
+          case 0:
+            if (!(src === "zh" && tgt === "en" && text.length <= 15)) {
+              _context2.n = 5;
+              break;
+            }
+            _context2.p = 1;
+            _context2.n = 2;
+            return httpJson("https://fanyi.baidu.com/sug", {
+              post: true,
+              body: "kw=" + encodeURIComponent(text)
+            });
+          case 2:
+            j2 = _context2.v;
+            if (!(j2 && j2.data && j2.data.length)) {
+              _context2.n = 3;
+              break;
+            }
+            v = j2.data[0].v;
+            if (!(v && v !== text)) {
+              _context2.n = 3;
+              break;
+            }
+            return _context2.a(2, v);
+          case 3:
+            _context2.n = 5;
+            break;
+          case 4:
+            _context2.p = 4;
+            _t4 = _context2.v;
+          case 5:
+            q = encodeURIComponent(text);
+            url = "https://api.mymemory.translated.net/get?q=".concat(q, "&langpair=").concat(mtCode(src), "|").concat(mtCode(tgt));
+            _context2.n = 6;
+            return httpJson(url);
+          case 6:
+            j = _context2.v;
             res = j && j.responseData && j.responseData.translatedText;
             if (res) {
-              _context.n = 4;
+              _context2.n = 7;
               break;
             }
             throw new Error("empty");
-          case 4:
-            return _context.a(2, res);
+          case 7:
+            return _context2.a(2, res);
         }
-      }, _callee);
+      }, _callee2, null, [[1, 4]]);
     }));
     return _onlineTranslate.apply(this, arguments);
   }
@@ -1560,51 +1674,51 @@ if (!Array.prototype.includes) {
       });
     });
   }
-  function translateOne(_x4, _x5, _x6) {
+  function translateOne(_x6, _x7, _x8) {
     return _translateOne.apply(this, arguments);
   }
   /* ---------- 工具 ---------- */
   function _translateOne() {
-    _translateOne = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(text, src, tgt) {
-      var r, off, _t;
-      return _regenerator().w(function (_context2) {
-        while (1) switch (_context2.p = _context2.n) {
+    _translateOne = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3(text, src, tgt) {
+      var r, off, _t5;
+      return _regenerator().w(function (_context3) {
+        while (1) switch (_context3.p = _context3.n) {
           case 0:
             if (text) {
-              _context2.n = 1;
+              _context3.n = 1;
               break;
             }
-            return _context2.a(2, "");
+            return _context3.a(2, "");
           case 1:
-            _context2.p = 1;
-            _context2.n = 2;
+            _context3.p = 1;
+            _context3.n = 2;
             return onlineTranslate(text, src, tgt);
           case 2:
-            r = _context2.v;
+            r = _context3.v;
             if (!(r && r.trim())) {
-              _context2.n = 3;
+              _context3.n = 3;
               break;
             }
-            return _context2.a(2, r.trim());
+            return _context3.a(2, r.trim());
           case 3:
-            _context2.n = 5;
+            _context3.n = 5;
             break;
           case 4:
-            _context2.p = 4;
-            _t = _context2.v;
+            _context3.p = 4;
+            _t5 = _context3.v;
           case 5:
             off = offlineTranslate(text, src, tgt);
             if (!off) {
-              _context2.n = 6;
+              _context3.n = 6;
               break;
             }
-            return _context2.a(2, off + "（离线词典）");
+            return _context3.a(2, off + "（离线词典）");
           case 6:
             throw new Error("no result");
           case 7:
-            return _context2.a(2);
+            return _context3.a(2);
         }
-      }, _callee2, null, [[1, 4]]);
+      }, _callee3, null, [[1, 4]]);
     }));
     return _translateOne.apply(this, arguments);
   }
