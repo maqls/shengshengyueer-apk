@@ -1089,6 +1089,14 @@ if (!Array.prototype.includes) {
     }
     return days[d.getUTCDay()] + " " + mons[d.getUTCMonth()] + " " + p2(d.getUTCDate()) + " " + d.getUTCFullYear() + " " + p2(d.getUTCHours()) + ":" + p2(d.getUTCMinutes()) + ":" + p2(d.getUTCSeconds()) + " GMT+0000 (Coordinated Universal Time)";
   }
+  function toCantonese(s) {
+    if (!s) return s;
+    var m = [["在吃什么", "喺食紧咩"], ["在干什么", "喺度做咩"], ["在做什么", "喺度做咩"], ["在干什么", "喺度做咩"], ["在哪儿", "喺边度"], ["在哪里", "喺边度"], ["为什么", "点解"], ["怎么样", "点样"], ["干什么", "做咩"], ["做什么", "做咩"], ["什么", "咩"], ["吃饭", "食饭"], ["喝水", "饮水"], ["喝茶", "饮茶"], ["吃", "食"], ["喝", "饮"], ["我们", "我哋"], ["你们", "你哋"], ["他们", "佢哋"], ["她们", "佢哋"], ["咱们", "我哋"], ["不是", "唔系"], ["不要", "唔好"], ["没有", "冇"], ["不用", "唔使"], ["不会", "唔会"], ["不能", "唔可以"], ["是", "系"], ["不", "唔"], ["他", "佢"], ["她", "佢"], ["这", "呢"], ["那", "嗰"], ["谢谢", "多谢"], ["对不起", "对唔住"], ["再见", "拜拜"], ["很", "好"], ["的", "嘅"]];
+    for (var i = 0; i < m.length; i++) {
+      s = s.split(m[i][0]).join(m[i][1]);
+    }
+    return s;
+  }
   function edgeSpeak(text, voice, cb) {
     var done = false,
       ws = null;
@@ -1275,9 +1283,10 @@ if (!Array.prototype.includes) {
           } catch (e) {}
         }
         var tries = 0;
+        var speakTxt = lang === "yue" ? toCantonese(text) : text;
         function tryEdge() {
           tries++;
-          edgeSpeak(text, msV, function (u, reason) {
+          edgeSpeak(speakTxt, msV, function (u, reason) {
             if (u) {
               playSrc(u);
             } else if (tries < 2) {
