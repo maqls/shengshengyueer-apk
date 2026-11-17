@@ -71,6 +71,8 @@
   footer{text-align:center;color:#c0b8a8;font-size:11px;margin-top:24px;}
   .reading .orig .unit{cursor:pointer;border-radius:4px;padding:0 1px;transition:background .15s;}
   .reading .orig .unit:active{background:#ffe9b8;}
+  .trans .unit{cursor:pointer;border-radius:4px;padding:0 1px;transition:background .15s;}
+  .trans .unit:active{background:#ffe9b8;}
 </style>
 </head>
 <body>
@@ -1667,7 +1669,18 @@ if (!Array.prototype.includes) {
       translateOne(s, lang, tgt).then(function (txt) {
         transMap[i].tgt = txt;
         var tr = els[i].querySelector(".trans");
-        tr.textContent = "🌍 " + txt;
+        tr.innerHTML = "🌍 " + wrapUnits(txt, tgt);
+        tr.querySelectorAll(".unit").forEach(function (u) {
+          u.addEventListener("click", function (ev) {
+            ev.stopPropagation();
+            stopSpeak();
+            highlight(els[i]);
+            playing = true;
+            speakText(u.textContent, tgt, function () {
+              playing = false;
+            });
+          });
+        });
       }).catch(function () {
         var tr = els[i].querySelector(".trans");
         tr.textContent = "翻译失败（请检查网络或切换语言）";
