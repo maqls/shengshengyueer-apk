@@ -9,7 +9,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="声声悦耳">
-<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -2096,10 +2095,12 @@ if (!Array.prototype.includes) {
 </script>
 <script>
   // 注册离线缓存（HTTPS/本地部署生效；File 协议下自动忽略）
-  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(()=>{});
-    });
+  if ('serviceWorker' in navigator) {
+    // 主动注销旧 Service Worker 并清空缓存（避免旧版本资源被永久缓存导致失效）
+    try {
+      navigator.serviceWorker.getRegistrations().then(function(rs){ rs.forEach(function(r){ r.unregister(); }); });
+      if (window.caches && caches.keys) { caches.keys().then(function(ks){ ks.forEach(function(k){ caches.delete(k); }); }); }
+    } catch(e) {}
   }
 </script>
 </body>
