@@ -874,6 +874,34 @@ if (!Array.prototype.includes) {
     return u;
   }
   var curAudio = null;
+  /* ===== TTS 音频缓存 & 预取（提速） ===== */
+  var ttsCache = {};
+  var MS_VOICES = {
+    zh: "zh-CN-XiaoxiaoNeural",
+    yue: "zh-HK-HiuMaanNeural",
+    en: "en-US-AriaNeural",
+    ja: "ja-JP-NanamiNeural",
+    ko: "ko-KR-SunHiNeural",
+    fr: "fr-FR-DeniseNeural",
+    es: "es-ES-ElviraNeural",
+    de: "de-DE-KatjaNeural",
+    ru: "ru-RU-SvetlanaNeural"
+  };
+  function prefetchTTS(text, lang) {
+    if (!text) return;
+    var ck = lang + "|" + text;
+    if (ttsCache[ck]) return;
+    var v = MS_VOICES[lang];
+    if (!v) return;
+    ttsCache[ck] = "__pending__";
+    try {
+      edgeSpeak(text, v, function (u) {
+        if (u) ttsCache[ck] = u;else delete ttsCache[ck];
+      });
+    } catch (e) {
+      delete ttsCache[ck];
+    }
+  }
   /* ===== Edge TTS 鉴权（Sec-MS-GEC v2，自 edge-tts 移植） ===== */
   var EDGE_TOKEN = "6A5AA1D4EAFF4E9FB37E23D68491D6F4";
   var EDGE_VER = "2-143.0.3650.75";
@@ -1248,6 +1276,11 @@ if (!Array.prototype.includes) {
           if (onEnd) onEnd();
         });
       }
+      var _ck = lang + "|" + text;
+      if (ttsCache[_ck] && ttsCache[_ck] !== "__pending__") {
+        playSrc(ttsCache[_ck]);
+        return;
+      }
       function fail(msg) {
         if (typeof status !== "undefined" && status) status.textContent = "⚠️ " + msg;
         if (onEnd) onEnd();
@@ -1323,6 +1356,7 @@ if (!Array.prototype.includes) {
           tries++;
           edgeSpeak(speakTxt, msV, function (u, reason) {
             if (u) {
+              if (_ck) ttsCache[_ck] = u;
               playSrc(u);
             } else if (tries < 2) {
               tryEdge();
@@ -1379,6 +1413,7 @@ if (!Array.prototype.includes) {
     playing = true;
     var i = 0;
     var elArr = htmlEls || [];
+    for (var p = 0; p < Math.min(3, sents.length); p++) prefetchTTS(sents[p], lang);
     function step() {
       if (!playing || i >= queue.length) {
         playing = false;
@@ -1386,6 +1421,8 @@ if (!Array.prototype.includes) {
         return;
       }
       highlight(elArr[i] || null);
+      if (i + 1 < queue.length) prefetchTTS(queue[i + 1], lang);
+      if (i + 2 < queue.length) prefetchTTS(queue[i + 2], lang);
       speakText(queue[i], lang, function () {
         if (!playing) return;
         i++;
