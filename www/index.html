@@ -79,6 +79,7 @@
   <header>
     <h1>📖 多语朗读 · 标音 · 翻译</h1>
     <div class="sub">离线标音 · 整段/逐句朗读 · 多语互译</div>
+    <button id="btnSettings" title="翻译服务设置" style="position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:50%;border:1px solid #e7d8b0;background:#fffdf6;font-size:17px;line-height:1;cursor:pointer;">⚙️</button>
     <div class="bar">
       <div class="field"><label>源语言（阅读/朗读）</label>
         <select id="srcLang"></select></div>
@@ -117,6 +118,21 @@
 
   <div class="card reading" id="result" style="display:none"></div>
   <footer>内置拼音/英语IPA/各语种读音规则，离线可用 · 多语翻译部分需联网</footer>
+</div>
+
+<div id="settingsModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:16px;padding:20px;max-width:420px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.2);">
+    <h3 style="margin:0 0 6px;font-size:16px;color:#6b4a12;">翻译服务设置（阿里云）</h3>
+    <p style="font-size:12px;color:#8b8378;margin:0 0 14px;line-height:1.6;">填入阿里云 AccessKey，翻译更专业准确。留空则自动用免费备用引擎。</p>
+    <label style="font-size:12px;color:#9a7b3c;">AccessKey ID</label>
+    <input id="setAk" autocomplete="off" style="width:100%;padding:10px;border:1px solid #e7d8b0;border-radius:8px;margin:4px 0 12px;font-size:14px;" placeholder="LTAI...">
+    <label style="font-size:12px;color:#9a7b3c;">AccessKey Secret</label>
+    <input id="setSk" type="password" autocomplete="off" style="width:100%;padding:10px;border:1px solid #e7d8b0;border-radius:8px;margin:4px 0 16px;font-size:14px;" placeholder="Secret">
+    <div style="display:flex;gap:10px;">
+      <button id="setCancel" style="flex:1;padding:12px;border:1px solid #ece7dc;background:#fff;border-radius:10px;font-size:14px;cursor:pointer;">取消</button>
+      <button id="setSave" style="flex:1;padding:12px;border:none;background:#e0a92c;color:#fff;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">保存</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1595,12 +1611,28 @@ if (!Array.prototype.includes) {
     for (i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
     return btoa(s);
   }
+  function aliAk() {
+    try {
+      var v = localStorage.getItem("ali_ak");
+      return v && v.trim() ? v.trim() : ALI_AK;
+    } catch (e) {
+      return ALI_AK;
+    }
+  }
+  function aliSk() {
+    try {
+      var v = localStorage.getItem("ali_sk");
+      return v && v.trim() ? v.trim() : ALI_SK;
+    } catch (e) {
+      return ALI_SK;
+    }
+  }
   function aliyunTrOnce(_x6, _x7, _x8) {
     return _aliyunTrOnce.apply(this, arguments);
   }
   function _aliyunTrOnce() {
     _aliyunTrOnce = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(text, src, tgt) {
-      var params, keys, qs, sts, hexH, url, j;
+      var AK, SK, params, keys, qs, sts, hexH, url, j;
       return _regenerator().w(function (_context4) {
         while (1) switch (_context4.n) {
           case 0:
@@ -1610,11 +1642,18 @@ if (!Array.prototype.includes) {
             }
             return _context4.a(2, "");
           case 1:
+            AK = aliAk(), SK = aliSk();
+            if (!(!AK || AK.indexOf("__ALI") >= 0)) {
+              _context4.n = 2;
+              break;
+            }
+            throw new Error("no-ak");
+          case 2:
             params = {
               Action: "TranslateGeneral",
               Version: "2018-10-12",
               Format: "JSON",
-              AccessKeyId: ALI_AK,
+              AccessKeyId: AK,
               SignatureMethod: "HMAC-SHA1",
               SignatureNonce: String(Math.floor(Math.random() * 1e9)) + String(Date.now()),
               SignatureVersion: "1.0",
@@ -1631,25 +1670,25 @@ if (!Array.prototype.includes) {
             }).join("&");
             sts = "GET&%2F&" + encRFC(qs);
             if (window.sha1 && window.sha1.hmac) {
-              _context4.n = 2;
+              _context4.n = 3;
               break;
             }
             throw new Error("no-hmac");
-          case 2:
-            hexH = window.sha1.hmac(ALI_SK + "&", sts);
-            url = "https://mt.aliyuncs.com/?" + qs + "&Signature=" + encRFC(aliB64(hexH));
-            _context4.n = 3;
-            return httpJson(url);
           case 3:
+            hexH = window.sha1.hmac(SK + "&", sts);
+            url = "https://mt.aliyuncs.com/?" + qs + "&Signature=" + encRFC(aliB64(hexH));
+            _context4.n = 4;
+            return httpJson(url);
+          case 4:
             j = _context4.v;
             if (!(j && j.Data && j.Data.Translated)) {
-              _context4.n = 4;
+              _context4.n = 5;
               break;
             }
             return _context4.a(2, j.Data.Translated);
-          case 4:
-            throw new Error(j && (j.Message || j.message) || "ali-empty");
           case 5:
+            throw new Error(j && (j.Message || j.message) || "ali-empty");
+          case 6:
             return _context4.a(2);
         }
       }, _callee4);
@@ -2065,6 +2104,33 @@ if (!Array.prototype.includes) {
     currentMode = p.dataset.mode;
   });
   $("btnRun").addEventListener("click", runMain);
+
+  /* 翻译服务设置弹窗 */
+  (function () {
+    var bs = document.getElementById("btnSettings"),
+      modal = document.getElementById("settingsModal");
+    if (!bs || !modal) return;
+    var akI = document.getElementById("setAk"),
+      skI = document.getElementById("setSk");
+    bs.addEventListener("click", function () {
+      var a = aliAk(),
+        sk = aliSk();
+      akI.value = a && a.indexOf("__ALI") < 0 ? a : "";
+      skI.value = sk && sk.indexOf("__ALI") < 0 ? sk : "";
+      modal.style.display = "flex";
+    });
+    document.getElementById("setCancel").addEventListener("click", function () {
+      modal.style.display = "none";
+    });
+    document.getElementById("setSave").addEventListener("click", function () {
+      try {
+        localStorage.setItem("ali_ak", (akI.value || "").trim());
+        localStorage.setItem("ali_sk", (skI.value || "").trim());
+      } catch (e) {}
+      modal.style.display = "none";
+      if (status) status.textContent = "✅ 翻译密钥已保存，将优先使用阿里云";
+    });
+  })();
   function runMain() {
     stopSpeak();
     var s = currentSents();
