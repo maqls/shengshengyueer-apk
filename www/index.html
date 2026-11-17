@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><script>window.onerror=function(m,s,l,c,e){try{var d=document.getElementById("__err");if(!d){d=document.createElement("div");d.id="__err";d.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#c00;color:#fff;font-size:12px;padding:6px;white-space:pre-wrap;max-height:45%;overflow:auto";document.documentElement.appendChild(d);}d.textContent+="ERR: "+m+" @"+l+":"+c+"\n";}catch(x){}return false;};window.addEventListener("unhandledrejection",function(e){try{var d=document.getElementById("__err");if(!d){d=document.createElement("div");d.id="__err";d.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#c00;color:#fff;font-size:12px;padding:6px;white-space:pre-wrap";document.documentElement.appendChild(d);}d.textContent+="PROMISE: "+((e.reason&&e.reason.message)||e.reason)+"\n";}catch(x){}});</script>
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>多语朗读 · 标音 · 翻译 学习助手</title>
@@ -1137,7 +1137,8 @@ if (!Array.prototype.includes) {
           return;
         }
         var esc = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&apos;");
-        var ssml = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='en-US'><voice name='" + voice + "'><prosody pitch='+0Hz' rate='+0%' volume='+0%'>" + esc + "</prosody></voice></speak>";
+        var vl = voice.split("-").slice(0, 2).join("-");
+        var ssml = "<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='" + vl + "'><voice name='" + voice + "'><prosody pitch='+0Hz' rate='+0%' volume='+0%'>" + esc + "</prosody></voice></speak>";
         try {
           var rid = "";
           for (var i = 0; i < 32; i++) rid += "0123456789abcdef"[Math.floor(Math.random() * 16)];
@@ -1256,26 +1257,36 @@ if (!Array.prototype.includes) {
           playSrc(url);
         }
       }
-      if (lang === "yue") {
+      var msV = {
+        zh: "zh-CN-XiaoxiaoNeural",
+        yue: "zh-HK-HiuMaanNeural",
+        en: "en-US-AriaNeural",
+        ja: "ja-JP-NanamiNeural",
+        ko: "ko-KR-SunHiNeural",
+        fr: "fr-FR-DeniseNeural",
+        es: "es-ES-ElviraNeural",
+        de: "de-DE-KatjaNeural",
+        ru: "ru-RU-SvetlanaNeural"
+      }[lang];
+      if (msV) {
         if (typeof status !== "undefined" && status) {
           try {
-            status.textContent = "正在合成粤语语音…";
+            status.textContent = "正在合成语音…";
           } catch (e) {}
         }
         var tries = 0;
         function tryEdge() {
           tries++;
-          edgeSpeak(text, "zh-HK-HiuMaanNeural", function (u, reason) {
+          edgeSpeak(text, msV, function (u, reason) {
             if (u) {
               playSrc(u);
             } else if (tries < 2) {
               tryEdge();
             } else {
-              var m = reason === "TIMEOUT" ? "连接微软粤语语音超时" : reason === "WSERROR" ? "连接微软粤语语音失败" : reason === "CLOSED" ? "粤语语音连接被关闭" : "粤语语音连接失败(" + (reason || "未知") + ")";
-              m += "｜UA:" + (navigator.userAgent || "").slice(0, 42);
+              var m = reason === "TIMEOUT" ? "语音合成超时" : reason === "WSERROR" ? "语音合成失败" : reason === "CLOSED" ? "语音连接被关闭" : "语音合成失败(" + (reason || "未知") + ")";
               if (typeof status !== "undefined" && status) {
                 try {
-                  status.textContent = "⚠️ " + m + "，已用普通话代读";
+                  status.textContent = "⚠️ " + m + "，已用备用语音代读";
                 } catch (e) {}
               }
               baiduGo();
