@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head><script>window.onerror=function(m,s,l,c,e){try{var d=document.getElementById("__err");if(!d){d=document.createElement("div");d.id="__err";d.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#c00;color:#fff;font-size:12px;padding:6px;white-space:pre-wrap;max-height:45%;overflow:auto";document.documentElement.appendChild(d);}d.textContent+="ERR: "+m+" @"+l+":"+c+"\n";}catch(x){}return false;};window.addEventListener("unhandledrejection",function(e){try{var d=document.getElementById("__err");if(!d){d=document.createElement("div");d.id="__err";d.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;background:#c00;color:#fff;font-size:12px;padding:6px;white-space:pre-wrap";document.documentElement.appendChild(d);}d.textContent+="PROMISE: "+((e.reason&&e.reason.message)||e.reason)+"\n";}catch(x){}});</script>
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>多语朗读 · 标音 · 翻译 学习助手</title>
@@ -1090,23 +1090,24 @@ if (!Array.prototype.includes) {
   function edgeSpeak(text, voice, cb) {
     var done = false,
       ws = null;
+    var reason = "";
     var timer = setTimeout(function () {
       if (!done) {
         done = true;
         try {
           if (ws) ws.close();
         } catch (e) {}
-        cb(null);
+        cb(null, "TIMEOUT");
       }
-    }, 20000);
-    function end(url) {
+    }, 15000);
+    function end(url, r) {
       if (done) return;
       done = true;
       clearTimeout(timer);
       try {
         if (ws) ws.close();
       } catch (e) {}
-      cb(url);
+      cb(url, r || reason);
     }
     try {
       var u = "wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1?TrustedClientToken=" + EDGE_TOKEN + "&Sec-MS-GEC=" + edgeGec() + "&Sec-MS-GEC-Version=" + EDGE_VER;
@@ -1130,7 +1131,7 @@ if (!Array.prototype.includes) {
             }
           }));
         } catch (e) {
-          end(null);
+          end(null, "SENDCFG");
           return;
         }
         var esc = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&apos;");
@@ -1140,7 +1141,7 @@ if (!Array.prototype.includes) {
           for (var i = 0; i < 32; i++) rid += "0123456789abcdef"[Math.floor(Math.random() * 16)];
           ws.send("X-RequestId:" + rid + "\r\nContent-Type:application/ssml+xml\r\nX-Timestamp:" + ts + "Z\r\nPath:ssml\r\n\r\n" + ssml);
         } catch (e) {
-          end(null);
+          end(null, "SENDSSML");
         }
       };
       ws.onmessage = function (ev) {
@@ -1158,7 +1159,7 @@ if (!Array.prototype.includes) {
               end(URL.createObjectURL(new Blob([all], {
                 type: "audio/mpeg"
               })));
-            } else end(null);
+            } else end(null, "NOAUDIO");
           }
         } else {
           var buf = new Uint8Array(ev.data);
@@ -1169,13 +1170,16 @@ if (!Array.prototype.includes) {
         }
       };
       ws.onerror = function () {
-        end(null);
+        reason = "WSERROR";
       };
-      ws.onclose = function () {
-        if (!done) end(null);
+      ws.onclose = function (ev) {
+        if (!done) {
+          if (!reason) reason = "CLOSED" + (ev && ev.code ? ":" + ev.code : "");
+          end(null);
+        }
       };
     } catch (e) {
-      end(null);
+      end(null, "EXC");
     }
   }
   function speakOnline(text, lang, onEnd) {
@@ -1261,13 +1265,26 @@ if (!Array.prototype.includes) {
             status.textContent = "正在合成粤语语音…";
           } catch (e) {}
         }
-        edgeSpeak(text, "zh-HK-HiuMaanNeural", function (u) {
-          if (u) {
-            playSrc(u);
-          } else {
-            baiduGo();
-          }
-        });
+        var tries = 0;
+        function tryEdge() {
+          tries++;
+          edgeSpeak(text, "zh-HK-HiuMaanNeural", function (u, reason) {
+            if (u) {
+              playSrc(u);
+            } else if (tries < 2) {
+              tryEdge();
+            } else {
+              var m = reason === "TIMEOUT" ? "连接微软粤语语音超时" : reason === "WSERROR" ? "连接微软粤语语音失败" : reason === "CLOSED" ? "粤语语音连接被关闭" : "粤语语音连接失败(" + (reason || "未知") + ")";
+              if (typeof status !== "undefined" && status) {
+                try {
+                  status.textContent = "⚠️ " + m + "，已用普通话代读";
+                } catch (e) {}
+              }
+              baiduGo();
+            }
+          });
+        }
+        tryEdge();
       } else {
         baiduGo();
       }
