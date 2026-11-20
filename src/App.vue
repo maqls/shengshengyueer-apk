@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, markRaw, type Component } from 'vue'
 import { useLearnStore } from './stores/learn'
+import QuizView from './components/QuizView.vue'
 import PracticeView from './components/PracticeView.vue'
 import LiteracyView from './components/LiteracyView.vue'
 import EnglishView from './components/EnglishView.vue'
@@ -10,9 +11,10 @@ import WrongBookView from './components/WrongBookView.vue'
 import SettingsView from './components/SettingsView.vue'
 
 const store = useLearnStore()
-const tab = ref<'practice' | 'literacy' | 'english' | 'tool' | 'wrong' | 'mastery' | 'settings'>('practice')
+const tab = ref<'quiz' | 'practice' | 'literacy' | 'english' | 'tool' | 'wrong' | 'mastery' | 'settings'>('quiz')
 
 const tabs: { key: typeof tab.value; ico: string; label: string; comp: Component }[] = [
+  { key: 'quiz', ico: '📚', label: '综合', comp: markRaw(QuizView) },
   { key: 'practice', ico: '✏️', label: '数学', comp: markRaw(PracticeView) },
   { key: 'literacy', ico: '🈶', label: '识字', comp: markRaw(LiteracyView) },
   { key: 'english', ico: '🔤', label: '英语', comp: markRaw(EnglishView) },

@@ -2,17 +2,19 @@
 import { computed, ref } from 'vue'
 import { useLearnStore } from '../stores/learn'
 import { templateById } from '../core/templates'
+import { SUBJECT_LABELS } from '../core/question-bank'
 import type { Subject } from '../core/types'
 
 const store = useLearnStore()
 const filter = ref<'all' | Subject>('all')
 const showAll = ref(false)
 
+const allSubjects: Subject[] = [
+  'math', 'chinese', 'english', 'literacy', 'science', 'history', 'geography', 'thinking'
+]
 const subjects: { key: 'all' | Subject; label: string }[] = [
   { key: 'all', label: '全部' },
-  { key: 'math', label: '数学' },
-  { key: 'literacy', label: '识字' },
-  { key: 'english', label: '英语' }
+  ...allSubjects.map((s) => ({ key: s, label: SUBJECT_LABELS[s] }))
 ]
 
 const wrongs = computed(() => {
@@ -25,7 +27,7 @@ const wrongs = computed(() => {
 const totalWrong = computed(() => store.records.filter((r) => !r.correct).length)
 
 function subjectLabel(subject: Subject): string {
-  return { math: '数学', literacy: '识字', english: '英语' }[subject]
+  return SUBJECT_LABELS[subject] ?? subject
 }
 
 function itemName(id: string, subject: Subject, prompt: string): string {

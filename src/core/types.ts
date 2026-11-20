@@ -35,7 +35,15 @@ export interface Question {
   fallbackExplain: string
 }
 
-export type Subject = 'math' | 'literacy' | 'english'
+export type Subject =
+  | 'math'
+  | 'literacy'
+  | 'english'
+  | 'chinese'
+  | 'science'
+  | 'history'
+  | 'geography'
+  | 'thinking'
 
 export interface AnswerRecord {
   id: string
