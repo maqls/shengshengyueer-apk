@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.local
+.DS_Store
+
+# 签名密钥（含私钥，切勿提交）
+android/keystore/*.jks
+android/keystore/*.keystore
+
+# 本地 SDK 路径
+android/local.properties

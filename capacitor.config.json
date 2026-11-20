@@ -1,0 +1,8 @@
+{
+  "appId": "com.maqls.shengshengyueer.learn",
+  "appName": "声声悦耳学习",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

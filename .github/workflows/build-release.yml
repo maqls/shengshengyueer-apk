@@ -1,0 +1,63 @@
+name: Build Signed Release APK
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npx cap sync android
+
+      - name: Prepare signing keystore
+        env:
+          KS_B64: ${{ secrets.RELEASE_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          KS_KEY_PASS: ${{ secrets.RELEASE_KEY_PASSWORD }}
+        run: |
+          mkdir -p android/app/keystore
+          if [ -n "$KS_B64" ]; then
+            echo "Using keystore from secrets"
+            echo "$KS_B64" | base64 -d > android/app/keystore/release.jks
+            sed -i "s|storeFile file('keystore/shengshengyueer.jks')|storeFile file('keystore/release.jks')|" android/app/build.gradle
+            sed -i "s/storePassword 'shengsheng2026'/storePassword '$KS_PASS'/" android/app/build.gradle
+            sed -i "s/keyAlias 'shengshengyueer'/keyAlias '$KS_ALIAS'/" android/app/build.gradle
+            sed -i "s/keyPassword 'shengsheng2026'/keyPassword '$KS_KEY_PASS'/" android/app/build.gradle
+          else
+            echo "No secrets found; generating a temporary self-signed keystore"
+            keytool -genkeypair -v \
+              -keystore android/app/keystore/release.jks \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -alias shengshengyueer \
+              -storepass shengsheng2026 -keypass shengsheng2026 \
+              -dname "CN=maqls, OU=Family, O=shengshengyueer, L=Local, ST=Local, C=CN"
+            sed -i "s|storeFile file('keystore/shengshengyueer.jks')|storeFile file('keystore/release.jks')|" android/app/build.gradle
+          fi
+
+      - name: Build signed release APK
+        working-directory: android
+        run: chmod +x gradlew && ./gradlew assembleRelease --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: shengshengyueer-learn-release
+          path: android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 30

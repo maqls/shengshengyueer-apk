@@ -1,0 +1,60 @@
+import type { LLMOptions, LLMProvider } from './provider'
+import { LLMError, withTimeout } from './provider'
+
+export class CloudProvider implements LLMProvider {
+  readonly name = 'cloud'
+
+  constructor(
+    private baseUrl: string,
+    private model: string,
+    private apiKey: string
+  ) {}
+
+  private get url(): string {
+    const base = this.baseUrl.replace(/\/$/, '')
+    return base.endsWith('/chat/completions') ? base : `${base}/v1/chat/completions`
+  }
+
+  async isAvailable(): Promise<boolean> {
+    return Boolean(this.apiKey && this.baseUrl)
+  }
+
+  async complete(prompt: string, options: LLMOptions = {}): Promise<string> {
+    const body = {
+      model: this.model,
+      messages: [
+        { role: 'system', content: '你是耐心的小学老师，用孩子能听懂的话分步讲解题目，只讲题目相关内容。' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.3,
+      max_tokens: options.maxTokens ?? 500,
+      stream: false
+    }
+    try {
+      const res = await withTimeout(
+        fetch(this.url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.apiKey}`
+          },
+          body: JSON.stringify(body)
+        }),
+        options.timeoutMs ?? 20000,
+        this.name
+      )
+      if (!res.ok) throw new LLMError(`HTTP ${res.status}`, this.name)
+      const data = (await res.json()) as {
+        choices?: { message?: { content?: string } }[]
+        error?: { message?: string }
+      }
+      if (data.error) throw new LLMError(data.error.message ?? '未知错误', this.name)
+      const content = data.choices?.[0]?.message?.content
+      if (!content) throw new LLMError('返回内容为空', this.name)
+      return content.trim()
+    } catch (err) {
+      if (err instanceof LLMError) throw err
+      throw new LLMError(err instanceof Error ? err.message : String(err), this.name)
+    }
+  }
+}

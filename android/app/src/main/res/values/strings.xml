@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">声声悦耳学习</string>
+    <string name="title_activity_main">声声悦耳学习</string>
+    <string name="package_name">com.maqls.shengshengyueer.learn</string>
+    <string name="custom_url_scheme">com.maqls.shengshengyueer.learn</string>
+</resources>
