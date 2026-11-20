@@ -4,17 +4,19 @@ import { useLearnStore } from './stores/learn'
 import PracticeView from './components/PracticeView.vue'
 import LiteracyView from './components/LiteracyView.vue'
 import EnglishView from './components/EnglishView.vue'
+import ToolView from './components/ToolView.vue'
 import MasteryView from './components/MasteryView.vue'
 import WrongBookView from './components/WrongBookView.vue'
 import SettingsView from './components/SettingsView.vue'
 
 const store = useLearnStore()
-const tab = ref<'practice' | 'literacy' | 'english' | 'wrong' | 'mastery' | 'settings'>('practice')
+const tab = ref<'practice' | 'literacy' | 'english' | 'tool' | 'wrong' | 'mastery' | 'settings'>('practice')
 
 const tabs: { key: typeof tab.value; ico: string; label: string; comp: Component }[] = [
   { key: 'practice', ico: '✏️', label: '数学', comp: markRaw(PracticeView) },
   { key: 'literacy', ico: '🈶', label: '识字', comp: markRaw(LiteracyView) },
   { key: 'english', ico: '🔤', label: '英语', comp: markRaw(EnglishView) },
+  { key: 'tool', ico: '🧰', label: '工具', comp: markRaw(ToolView) },
   { key: 'wrong', ico: '📕', label: '错题', comp: markRaw(WrongBookView) },
   { key: 'mastery', ico: '📊', label: '进度', comp: markRaw(MasteryView) },
   { key: 'settings', ico: '⚙️', label: '设置', comp: markRaw(SettingsView) }
