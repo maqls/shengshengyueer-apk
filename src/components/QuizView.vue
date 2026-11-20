@@ -5,6 +5,9 @@ import { nextQuiz, checkQuiz, makeQuizRecord, type QuizTask } from '../core/quiz
 import { SUBJECT_LABELS, GRADE_LABELS, availableGrades } from '../core/question-bank'
 import type { Subject } from '../core/types'
 import { shuffle } from '../core/random'
+import { createProviders, explain } from '../llm'
+import { generateQuizByLLM } from '../llm/quiz-generator'
+import type { LLMProvider } from '../llm/provider'
 
 const app = useLearnStore()
 const subject = ref<Subject | undefined>(undefined)
@@ -14,6 +17,11 @@ const input = ref('')
 const selected = ref('')
 const result = ref<'correct' | 'wrong' | null>(null)
 const historyIds = ref<string[]>([])
+const historyPrompts = ref<string[]>([])
+const source = ref<'llm' | 'bank'>('bank')
+const explainText = ref('')
+const explainSource = ref('')
+const generating = ref(false)
 
 const allSubjects: (Subject | undefined)[] = [
   undefined, 'math', 'chinese', 'english', 'literacy', 'science', 'history', 'geography', 'thinking'
@@ -26,35 +34,82 @@ function subjectLabel(s: Subject | undefined): string {
 function gradeLabel(g: number | undefined): string {
   return g === undefined ? '不限年级' : (GRADE_LABELS[g] ?? `${g}年级`)
 }
+function llmProviders(): LLMProvider[] {
+  return app.settings ? createProviders(app.settings) : []
+}
 
-function newTask(): void {
-  task.value = nextQuiz(subject.value, grade.value, historyIds.value)
+async function newTask(): Promise<void> {
+  generating.value = true
   input.value = ''
   selected.value = ''
   result.value = null
-  if (task.value) historyIds.value.push(task.value.id)
+  explainText.value = ''
+  explainSource.value = ''
+  try {
+    const providers = llmProviders()
+    let next: QuizTask | null = null
+    if (providers.length > 1) {
+      next = await generateQuizByLLM(providers, subject.value, grade.value, historyPrompts.value)
+    }
+    if (next) {
+      source.value = 'llm'
+    } else {
+      next = nextQuiz(subject.value, grade.value, historyIds.value)
+      source.value = 'bank'
+    }
+    task.value = next
+    if (next) {
+      historyIds.value.push(next.id)
+      historyPrompts.value.push(next.prompt)
+    }
+  } finally {
+    generating.value = false
+  }
 }
 
 function choose(option: string): void {
   selected.value = option
 }
 
-function submit(): void {
+async function submit(): Promise<void> {
   if (!task.value || result.value) return
+  const currentTask = task.value
   const answer = task.value.kind === 'choice' ? selected.value : input.value
   if (!answer.trim()) {
     app.notify('请先作答')
     return
   }
-  const correct = checkQuiz(task.value, answer)
+  const correct = checkQuiz(currentTask, answer)
   result.value = correct ? 'correct' : 'wrong'
-  app.applyTextRecord(makeQuizRecord(task.value, answer, 3000))
+  app.applyTextRecord(makeQuizRecord(currentTask, answer, 3000))
+
+  const fallback = currentTask.explain + (correct ? '' : ` 正确答案是：${currentTask.answer}。`)
+  explainText.value = fallback
+  explainSource.value = 'preset'
+
+  const providers = llmProviders()
+  if (providers.length > 1) {
+    const prompt = [
+      '请用学生能听懂的话，分步讲解下面这道题。',
+      `题目：${currentTask.prompt}`,
+      `正确答案：${currentTask.answer}`,
+      `学生答案：${answer}`,
+      correct ? '学生答对了，讲清为什么对。' : '学生答错了，指出错在哪里并讲正确思路。',
+      '只输出讲解内容，不要输出 JSON。'
+    ].join('\n')
+    const outcome = await explain(providers, prompt, fallback)
+    if (task.value?.id === currentTask.id) {
+      explainText.value = outcome.text
+      explainSource.value = outcome.provider
+    }
+  }
 }
 
 function resetFilter(): void {
   subject.value = undefined
   grade.value = undefined
   historyIds.value = []
+  historyPrompts.value = []
   newTask()
 }
 
@@ -63,7 +118,10 @@ const options = computed(() => {
   return shuffle(task.value.options)
 })
 
-onMounted(newTask)
+onMounted(async () => {
+  if (!app.settings) await app.init()
+  await newTask()
+})
 </script>
 
 <template>
@@ -71,7 +129,7 @@ onMounted(newTask)
     <div class="topbar">
       <div>
         <h1>📚 综合学习</h1>
-        <div class="sub">全年级 · 多学科 · 题库可持续扩展</div>
+        <div class="sub">全年级 · 多学科 · 电脑模型动态出题</div>
       </div>
     </div>
 
@@ -99,10 +157,15 @@ onMounted(newTask)
       </div>
     </div>
 
-    <div v-if="task" class="card">
+    <div v-if="generating" class="card empty">电脑模型正在出题…</div>
+
+    <div v-else-if="task" class="card">
       <div class="row tight" style="justify-content:space-between;align-items:center">
         <span class="badge">{{ SUBJECT_LABELS[task.subject] }}</span>
         <span class="badge">{{ task.kind === 'choice' ? '选择题' : task.kind === 'judge' ? '判断题' : '填空题' }}</span>
+        <span class="badge" :class="source === 'llm' ? 'ok' : ''">
+          {{ source === 'llm' ? '电脑模型出题' : '离线题库' }}
+        </span>
       </div>
 
       <div style="font-size:18px;line-height:1.7;margin:16px 0">{{ task.prompt }}</div>
@@ -139,7 +202,10 @@ onMounted(newTask)
             {{ result === 'correct' ? '答对了！' : `正确答案是：${task.answer}` }}
           </span>
         </div>
-        <div style="margin-top:8px">{{ task.explain }}</div>
+        <div style="margin-top:8px">{{ explainText }}</div>
+        <div class="source-tag">
+          讲解来源：{{ { ollama: '电脑本地模型', cloud: '云端模型', preset: '预设解析', fallback: '预设解析', cache: '缓存' }[explainSource] ?? explainSource }}
+        </div>
         <button class="btn primary block" style="margin-top:12px" @click="newTask">下一题</button>
       </div>
     </div>
