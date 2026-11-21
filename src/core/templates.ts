@@ -2,6 +2,45 @@ import type { QuestionTemplate } from './types'
 
 export const TEMPLATES: QuestionTemplate[] = [
   {
+    id: 'count_objects',
+    knowledge: ['counting'],
+    grade: 0,
+    difficulty: 1,
+    type: 'number',
+    params: { a: { min: 1, max: 9 } },
+    question: '数一数：从 1 数到 {a}，最后数的数字是？',
+    answer: '{a}',
+    distractors: ['{a} + 1', '{a} - 1', '10'],
+    explainPrompt: '这是学前数数题。请带孩子从 1 一直数到 {a}，告诉他最后数到的数字就是 {a}。用学前孩子能懂的话。',
+    fallbackExplain: '从 1 开始一个一个数，数到最后就是答案。'
+  },
+  {
+    id: 'compare_size',
+    knowledge: ['comparison'],
+    grade: 0,
+    difficulty: 1,
+    type: 'number',
+    params: { a: { min: 2, max: 5 }, b: { min: 6, max: 9 } },
+    question: '{a} 和 {b} 哪个大？大的那个是？',
+    answer: '{b}',
+    distractors: ['{a}', '{a} + {b}', '{b} - {a}'],
+    explainPrompt: '这是学前比大小题。{b} 比 {a} 大，可以用数数验证：{b} 排在 {a} 后面。用学前孩子能懂的话。',
+    fallbackExplain: '数越大越靠后，{b} 比 {a} 大。'
+  },
+  {
+    id: 'add_tiny',
+    knowledge: ['basic_addition'],
+    grade: 0,
+    difficulty: 1,
+    type: 'number',
+    params: { a: { min: 1, max: 3 }, b: { min: 1, max: 3 } },
+    question: '{a} + {b} = ?',
+    answer: '{a} + {b}',
+    distractors: ['{a} + {b} + 1', '{a} + {b} - 1', '{a} * {b}'],
+    explainPrompt: '这是学前简单加法。{a} 加 {b}，可以用手指头数：先伸出 {a} 根手指，再添 {b} 根。用学前孩子能懂的话。',
+    fallbackExplain: '用手指头数一数就知道了。'
+  },
+  {
     id: 'add_2digit_carry',
     knowledge: ['two_digit_addition', 'carry'],
     grade: 1,

@@ -59,10 +59,25 @@ export interface QuestionFilter {
 
 export function generateQuestion(filter: QuestionFilter = {}): Question {
   let pool = TEMPLATES
-  if (filter.grade !== undefined) pool = pool.filter((t) => t.grade === filter.grade)
-  if (filter.difficulty !== undefined) pool = pool.filter((t) => t.difficulty === filter.difficulty)
+  if (filter.grade !== undefined) {
+    const exact = TEMPLATES.filter((t) => t.grade === filter.grade)
+    // 该年级无模板时向下就近回退，避免无题可用
+    if (exact.length) {
+      pool = exact
+    } else {
+      for (let g = filter.grade - 1; g >= 0 && pool === TEMPLATES; g--) {
+        const lower = TEMPLATES.filter((t) => t.grade === g)
+        if (lower.length) pool = lower
+      }
+    }
+  }
+  if (filter.difficulty !== undefined) {
+    const byDiff = pool.filter((t) => t.difficulty === filter.difficulty)
+    if (byDiff.length) pool = byDiff
+  }
   if (filter.knowledge?.length) {
-    pool = pool.filter((t) => filter.knowledge!.some((k) => t.knowledge.includes(k)))
+    const byK = pool.filter((t) => filter.knowledge!.some((k) => t.knowledge.includes(k)))
+    if (byK.length) pool = byK
   }
   if (filter.templateIds?.length) {
     pool = pool.filter((t) => filter.templateIds!.includes(t.id))

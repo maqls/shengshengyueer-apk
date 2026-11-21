@@ -11,7 +11,9 @@ const gradesInStage = computed(() => currentStage.value?.grades ?? [])
 
 function chooseStage(key: string | undefined): void {
   stage.value = key
-  emit('update:modelValue', undefined)
+  // 选学段后自动选中该学段第一个年级，保证出的题匹配学段
+  const first = GRADE_STAGES.find((s) => s.key === key)?.grades[0]
+  emit('update:modelValue', first)
 }
 function chooseGrade(g: number | undefined): void {
   emit('update:modelValue', g)
