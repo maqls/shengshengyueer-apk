@@ -7,6 +7,7 @@ import { applyRecords, weakestKnowledge } from '../core/mastery'
 import { buildReviewItems } from '../core/review'
 import { store } from '../storage/db'
 import { createProviders, explain } from '../llm'
+import { buildExplainSystem, buildExplainUser } from '../llm/explain-prompt'
 import type { LLMProvider } from '../llm/provider'
 
 export const useLearnStore = defineStore('learn', () => {
@@ -67,7 +68,8 @@ export const useLearnStore = defineStore('learn', () => {
     await store.saveMasteries(masteries.value)
     lastCorrect.value = record.correct
 
-    const cached = await store.getExplanation(current.value.id)
+    const cacheKey = `v2_${current.value.id}`
+    const cached = await store.getExplanation(cacheKey)
     if (cached) {
       explanation.value = cached
       explainSource.value = 'cache'
@@ -81,10 +83,17 @@ export const useLearnStore = defineStore('learn', () => {
       if (!record.correct) {
         fallback = `${fallback} 正确答案是 ${current.value.answer}。再想想哦。`
       }
-      const result = await explain(providers, current.value.explainPrompt, fallback)
+      const sys = buildExplainSystem()
+      const user = buildExplainUser({
+        question: current.value.text,
+        answer: String(current.value.answer),
+        userAnswer,
+        correct: record.correct
+      })
+      const result = await explain(providers, user, fallback, sys)
       explanation.value = result.text
       explainSource.value = result.provider
-      await store.saveExplanation(current.value.id, result.text, result.provider)
+      await store.saveExplanation(cacheKey, result.text, result.provider)
     } finally {
       loading.value = false
     }

@@ -29,12 +29,13 @@ export function createProviders(settings: Settings): LLMProvider[] {
 export async function explain(
   providers: LLMProvider[],
   prompt: string,
-  fallbackText: string
+  fallbackText: string,
+  system?: string
 ): Promise<{ text: string; provider: string }> {
   for (const provider of providers) {
     const input = provider.name === 'fallback' ? fallbackText : prompt
     try {
-      const text = await provider.complete(input)
+      const text = await provider.complete(input, { system, maxTokens: 1200 })
       return { text, provider: provider.name }
     } catch {
       continue

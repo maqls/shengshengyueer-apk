@@ -6,6 +6,7 @@ import { SUBJECT_LABELS, GRADE_LABELS, availableGrades } from '../core/question-
 import type { Subject } from '../core/types'
 import { shuffle } from '../core/random'
 import { createProviders, explain } from '../llm'
+import { buildExplainSystem, buildExplainUser } from '../llm/explain-prompt'
 import { generateQuizByLLM } from '../llm/quiz-generator'
 import type { LLMProvider } from '../llm/provider'
 
@@ -105,15 +106,14 @@ async function submit(): Promise<void> {
 
   const providers = llmProviders()
   if (providers.length > 1) {
-    const prompt = [
-      '请用学生能听懂的话，分步讲解下面这道题。',
-      `题目：${currentTask.prompt}`,
-      `正确答案：${currentTask.answer}`,
-      `学生答案：${answer}`,
-      correct ? '学生答对了，讲清为什么对。' : '学生答错了，指出错在哪里并讲正确思路。',
-      '只输出讲解内容，不要输出 JSON。'
-    ].join('\n')
-    const outcome = await explain(providers, prompt, fallback)
+    const sys = buildExplainSystem()
+    const user = buildExplainUser({
+      question: currentTask.prompt,
+      answer: currentTask.answer,
+      userAnswer: answer,
+      correct
+    })
+    const outcome = await explain(providers, user, fallback, sys)
     if (task.value?.id === currentTask.id) {
       explainText.value = outcome.text
       explainSource.value = outcome.provider
