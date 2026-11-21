@@ -54,10 +54,11 @@ function itemName(id: string, subject: Subject, prompt: string): string {
     </div>
 
     <div class="card">
-      <div class="segment">
+      <div class="chips">
         <button
           v-for="s in subjects"
           :key="s.key"
+          class="chip"
           :class="{ on: filter === s.key }"
           @click="filter = s.key"
         >{{ s.label }}</button>

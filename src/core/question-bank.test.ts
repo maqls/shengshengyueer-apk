@@ -12,12 +12,16 @@ describe('通用题库', () => {
     for (const s of expected) expect(subjects.has(s)).toBe(true)
   })
 
-  it('覆盖全年级段（学前到初三）', () => {
+  it('覆盖全学段（学前到博士）', () => {
     const grades = availableGrades()
     expect(grades).toContain(0)
     expect(grades).toContain(1)
     expect(grades).toContain(6)
     expect(grades).toContain(9)
+    expect(grades).toContain(12)
+    expect(grades).toContain(16)
+    expect(grades).toContain(18)
+    expect(grades).toContain(22)
   })
 
   it('每道题字段完整', () => {
