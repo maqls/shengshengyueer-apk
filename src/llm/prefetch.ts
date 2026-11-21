@@ -4,7 +4,7 @@ import { generateQuizByLLM } from './quiz-generator'
 import { nextQuiz, type QuizTask } from '../core/quiz'
 import type { Subject } from '../core/types'
 
-const CACHE_SIZE = 3
+const CACHE_SIZE = 5
 
 /** 后台预生成状态，供界面实时显示 */
 export const prefetchState = ref<{ cached: number; filling: boolean; warming: boolean }>({
@@ -17,6 +17,7 @@ export class QuizPrefetcher {
   private cache: QuizTask[] = []
   private warming = false
   private filling = false
+  private refill = false
   private key = ''
 
   private sync(): void {
@@ -72,7 +73,11 @@ export class QuizPrefetcher {
     grade: number | number[] | undefined,
     exclude: string[] = []
   ): Promise<void> {
-    if (this.filling) return
+    if (this.filling) {
+      // 忙时记下待补标记，本轮结束后自动继续补满
+      this.refill = true
+      return
+    }
     if (this.cache.length >= CACHE_SIZE) return
     const key = this.filterKey(subject, grade)
     if (key !== this.key) {
@@ -82,23 +87,27 @@ export class QuizPrefetcher {
     this.filling = true
     this.sync()
     try {
-      for (let i = this.cache.length; i < CACHE_SIZE; i++) {
-        const result = await generateQuizByLLM(
-          providers,
-          subject,
-          grade,
-          [...exclude, ...this.cache.map((q) => q.prompt)]
-        )
-        if (result.task) {
-          this.cache.push(result.task)
-        } else {
-          // 模型失败时用题库题填充缓存，保证「下一题」永远秒出
-          const bankTask = nextQuiz(subject, grade, this.cache.map((q) => q.id))
-          if (!bankTask) break
-          this.cache.push(bankTask)
+      do {
+        this.refill = false
+        for (let i = this.cache.length; i < CACHE_SIZE; i++) {
+          const result = await generateQuizByLLM(
+            providers,
+            subject,
+            grade,
+            [...exclude, ...this.cache.map((q) => q.prompt)]
+          )
+          if (result.task) {
+            this.cache.push(result.task)
+          } else {
+            // 模型失败时用题库题填充缓存，保证「下一题」永远秒出
+            const bankTask = nextQuiz(subject, grade, this.cache.map((q) => q.id))
+            if (!bankTask) break
+            this.cache.push(bankTask)
+          }
+          this.sync()
         }
-        this.sync()
-      }
+        // 生成期间有新取题请求，忙完后继续补满
+      } while (this.refill && this.cache.length < CACHE_SIZE)
     } finally {
       this.filling = false
       this.sync()

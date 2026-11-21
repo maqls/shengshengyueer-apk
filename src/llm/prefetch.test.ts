@@ -42,4 +42,31 @@ describe('预生成缓存', () => {
     const p = new QuizPrefetcher()
     await expect(p.warmup([real])).resolves.toBeUndefined()
   })
+
+  it('fill 忙时请求不丢弃，忙完自动补满', async () => {
+    const p = new QuizPrefetcher()
+    ;(p as unknown as { key: string }).key = 'math|1'
+    const provider = {
+      name: 'ollama',
+      complete: vi.fn().mockResolvedValue(JSON.stringify({
+        kind: 'fill', prompt: 'x', answer: '1', explain: 'e', knowledge: 'k'
+      })),
+      isAvailable: vi.fn()
+    }
+    // 模拟正在填充时的请求：应记录待补标记而不是丢弃
+    ;(p as unknown as { filling: boolean }).filling = true
+    void p.fill([provider], 'math', 1, [])
+    ;(p as unknown as { filling: boolean }).filling = false
+    await p.fill([provider], 'math', 1, [])
+    expect((p as unknown as { cache: unknown[] }).cache.length).toBe(5)
+    expect((p as unknown as { refill: boolean }).refill).toBe(false)
+  })
+
+  it('模型失败时用题库题兜底填充', async () => {
+    const p = new QuizPrefetcher()
+    ;(p as unknown as { key: string }).key = 'math|1'
+    const provider = { name: 'ollama', complete: vi.fn().mockRejectedValue(new Error('down')), isAvailable: vi.fn() }
+    await p.fill([provider], 'math', 1, [])
+    expect((p as unknown as { cache: unknown[] }).cache.length).toBe(5)
+  })
 })
