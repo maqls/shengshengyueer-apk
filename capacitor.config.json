@@ -9,6 +9,7 @@
     }
   },
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "androidMixedContentMode": "always_allow"
   }
 }
