@@ -35,7 +35,7 @@ function getDB(): Promise<IDBPDatabase<LearnDB>> {
 export const DEFAULT_SETTINGS: Settings = {
   llmMode: 'local',
   ollamaBaseUrl: 'http://192.168.0.42:11434',
-  ollamaModel: 'qwen2.5:7b',
+  ollamaModel: 'qwen3-vl:8b',
   cloudBaseUrl: '',
   cloudModel: 'deepseek-chat',
   cloudApiKey: '',
@@ -83,6 +83,9 @@ export const store = {
     const merged = { ...DEFAULT_SETTINGS, ...(item ? stripKey(item) : {}) }
     if (merged.ollamaBaseUrl === 'http://192.168.1.42:11434') {
       merged.ollamaBaseUrl = DEFAULT_SETTINGS.ollamaBaseUrl
+    }
+    if (merged.ollamaModel === 'qwen2.5:7b') {
+      merged.ollamaModel = DEFAULT_SETTINGS.ollamaModel
     }
     return merged
   },

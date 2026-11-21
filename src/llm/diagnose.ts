@@ -1,4 +1,16 @@
-import { httpRequest, type HttpResult } from './http'
+import { httpRequest, parseJson, type HttpResult } from './http'
+
+export async function listOllamaModels(baseUrl: string, timeoutMs = 5000): Promise<string[]> {
+  const base = baseUrl.replace(/\/$/, '')
+  try {
+    const res = await httpRequest(`${base}/api/tags`, { timeoutMs })
+    if (!res.ok) return []
+    const data = parseJson<{ models?: { name?: string }[] }>(res)
+    return (data.models ?? []).map((m) => m.name).filter((n): n is string => Boolean(n))
+  } catch {
+    return []
+  }
+}
 
 export interface ProbeResult {
   label: string

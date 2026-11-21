@@ -3,7 +3,7 @@ import { reactive, onMounted, ref } from 'vue'
 import { useLearnStore } from '../stores/learn'
 import { store as db, DEFAULT_SETTINGS, exportAll, importAll } from '../storage/db'
 import { OllamaProvider, CloudProvider } from '../llm'
-import { probeOllama } from '../llm/diagnose'
+import { probeOllama, listOllamaModels } from '../llm/diagnose'
 import type { Settings } from '../core/types'
 
 const app = useLearnStore()
@@ -12,10 +12,29 @@ const saved = reactive({ value: false })
 const fileInput = ref<HTMLInputElement | null>(null)
 const testResult = ref('')
 const testing = ref(false)
+const models = ref<string[]>([])
+const loadingModels = ref(false)
+
+async function refreshModels(): Promise<void> {
+  if (form.llmMode !== 'local') return
+  loadingModels.value = true
+  try {
+    models.value = await listOllamaModels(form.ollamaBaseUrl)
+    if (models.value.length && !models.value.includes(form.ollamaModel)) {
+      form.ollamaModel = models.value[0]
+      await db.saveSettings({ ...form })
+      app.settings = { ...form }
+      app.notify(`已自动选用模型：${form.ollamaModel}`)
+    }
+  } finally {
+    loadingModels.value = false
+  }
+}
 
 onMounted(async () => {
   const settings = await db.getSettings()
   Object.assign(form, settings)
+  await refreshModels()
 })
 
 async function doExport(): Promise<void> {
@@ -136,14 +155,20 @@ async function testLocal(): Promise<void> {
       <template v-if="form.llmMode === 'local'">
         <div class="field">
           <label>电脑 Ollama 地址（同一 WiFi）</label>
-          <input v-model="form.ollamaBaseUrl" placeholder="http://192.168.0.42:11434" />
+          <input v-model="form.ollamaBaseUrl" placeholder="http://192.168.0.42:11434" @change="refreshModels" />
         </div>
         <div class="field">
-          <label>模型名称</label>
-          <input v-model="form.ollamaModel" placeholder="qwen2.5:7b" />
+          <label>模型名称（自动读取电脑已安装的模型）</label>
+          <input v-model="form.ollamaModel" :list="'ollama-models'" placeholder="选择或输入模型名" />
+          <datalist id="ollama-models">
+            <option v-for="m in models" :key="m" :value="m"></option>
+          </datalist>
+          <button class="btn ghost small" style="margin-top:6px" :disabled="loadingModels" @click="refreshModels">
+            {{ loadingModels ? '读取中…' : '刷新模型列表' }}
+          </button>
         </div>
         <div class="source-tag">
-          电脑需设置 OLLAMA_HOST=0.0.0.0:11434 并放行防火墙。连接失败会自动回退到预设解析。
+          检测到 {{ models.length }} 个模型{{ models.length ? '：' + models.join('、') : '（点刷新或检查连接）' }}。模型名必须是你电脑上实际安装的，否则会报 model not found。
         </div>
       </template>
 
