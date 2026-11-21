@@ -10,8 +10,10 @@ import {
 } from '../core/literacy'
 import { speakChinese, speechSupported } from '../core/speech'
 import GradePicker from './GradePicker.vue'
+import AiQuizCard from './AiQuizCard.vue'
 
 const app = useLearnStore()
+const view = ref<'ai' | 'card' | 'dictation'>('ai')
 const mode = ref<LiteracyMode>('card')
 const grade = ref<number | undefined>(undefined)
 const task = ref<LiteracyTask | null>(null)
@@ -59,15 +61,18 @@ onMounted(newTask)
 
     <div class="card">
       <div class="segment">
-        <button :class="{ on: mode === 'card' }" @click="changeMode('card')">生字卡</button>
-        <button :class="{ on: mode === 'dictation' }" @click="changeMode('dictation')">听写</button>
+        <button :class="{ on: view === 'ai' }" @click="view = 'ai'">智能出题</button>
+        <button :class="{ on: view === 'card' }" @click="changeMode('card')">生字卡</button>
+        <button :class="{ on: view === 'dictation' }" @click="changeMode('dictation')">听写</button>
       </div>
-      <div class="segment">
-        <GradePicker :model-value="grade" @update:model-value="(g) => { grade = g; newTask() }" />
+      <div class="segment" style="margin-top:8px">
+        <GradePicker :model-value="grade" @update:model-value="(g) => { grade = g; if (view !== 'ai') newTask() }" />
       </div>
     </div>
 
-    <div v-if="task" class="card" style="text-align:center">
+    <AiQuizCard v-if="view === 'ai'" subject="chinese" :grade="grade" />
+
+    <div v-else-if="task" class="card" style="text-align:center">
       <template v-if="mode === 'card'">
         <div style="font-size:72px;font-weight:700;line-height:1.2">{{ task.char }}</div>
         <div style="font-size:22px;color:var(--accent-deep);margin:6px 0">{{ task.pinyin }}</div>

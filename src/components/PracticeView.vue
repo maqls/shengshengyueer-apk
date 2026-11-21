@@ -2,8 +2,10 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useLearnStore } from '../stores/learn'
 import GradePicker from './GradePicker.vue'
+import AiQuizCard from './AiQuizCard.vue'
 
 const store = useLearnStore()
+const mode = ref<'ai' | 'drill'>('ai')
 const answer = ref<number | null>(null)
 const inputText = ref('')
 const submitted = ref(false)
@@ -53,12 +55,21 @@ onMounted(() => {
     </div>
 
     <div class="card">
-      <GradePicker
-        :model-value="store.mathGrade"
-        @update:model-value="(g) => { store.setMathGrade(g); store.nextQuestion() }"
-      />
+      <div class="segment">
+        <button :class="{ on: mode === 'ai' }" @click="mode = 'ai'">智能出题</button>
+        <button :class="{ on: mode === 'drill' }" @click="mode = 'drill'">口算模板</button>
+      </div>
+      <div class="segment" style="margin-top:8px">
+        <GradePicker
+          :model-value="store.mathGrade"
+          @update:model-value="(g) => { store.setMathGrade(g); if (mode === 'drill') store.nextQuestion() }"
+        />
+      </div>
     </div>
 
+    <AiQuizCard v-if="mode === 'ai'" subject="math" :grade="store.mathGrade" />
+
+    <template v-else>
     <div v-if="store.loading && !store.current" class="card empty">正在出题…</div>
 
     <template v-else-if="store.current">
@@ -113,6 +124,7 @@ onMounted(() => {
         </div>
         <button class="btn primary block" style="margin-top:14px" @click="store.nextQuestion()">下一题</button>
       </div>
+    </template>
     </template>
 
   </div>
