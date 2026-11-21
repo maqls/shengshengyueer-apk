@@ -15,9 +15,11 @@ export class OllamaProvider implements LLMProvider {
 
   async isAvailable(): Promise<boolean> {
     try {
-      const res = await fetch(`${this.baseUrl.replace(/\/$/, '')}/api/tags`, {
-        signal: AbortSignal.timeout?.(2000)
-      })
+      const res = await withTimeout(
+        fetch(`${this.baseUrl.replace(/\/$/, '')}/api/tags`),
+        2500,
+        this.name
+      )
       return res.ok
     } catch {
       return false

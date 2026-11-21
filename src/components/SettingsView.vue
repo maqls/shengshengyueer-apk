@@ -67,7 +67,17 @@ async function testLocal(): Promise<void> {
     }
     const ok = await provider.isAvailable()
     if (!ok) {
-      testResult.value = `连接失败：无法访问 ${form.llmMode === 'cloud' ? form.cloudBaseUrl : form.ollamaBaseUrl}。\n请检查：电脑 Ollama 是否运行、地址是否为 http://电脑IP:11434、手机与电脑是否同 WiFi、防火墙是否放行 11434。`
+      const url = form.llmMode === 'cloud' ? form.cloudBaseUrl : form.ollamaBaseUrl
+      testResult.value = [
+        `连接失败：无法访问 ${url}`,
+        '',
+        '排查顺序：',
+        '1) 电脑 Ollama 是否运行（任务栏/服务），日志有无请求',
+        '2) 电脑设置 OLLAMA_HOST=0.0.0.0:11434 并重启 Ollama',
+        '3) Windows 防火墙放行 11434 端口',
+        '4) 手机与电脑是否同一 WiFi、同一网段（如都是 192.168.0.x）',
+        '5) 用浏览器在手机打开 ' + url + '/api/tags 看能否访问'
+      ].join('\n')
       return
     }
     const text = await provider.complete('请只回复两个字：正常', { timeoutMs: 20000, maxTokens: 20 })
