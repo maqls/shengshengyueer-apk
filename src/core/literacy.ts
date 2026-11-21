@@ -1,4 +1,5 @@
 import { LITERACY_CHARS, charsByGrade, type LiteracyChar } from './literacy-data'
+
 import { pick, shuffle, uid } from './random'
 import type { AnswerRecord } from './types'
 
@@ -34,10 +35,17 @@ function toTask(item: LiteracyChar, mode: LiteracyMode): LiteracyTask {
 
 export function nextLiteracyTask(
   mode: LiteracyMode,
-  grade = 1,
+  grade: number | undefined = undefined,
   excludeIds: string[] = []
 ): LiteracyTask {
-  const pool = charsByGrade(grade)
+  let pool = grade === undefined ? LITERACY_CHARS : charsByGrade(grade)
+  if (!pool.length) {
+    // 向下就近回退：选高年级但该年级无字时，用最近低年级的字
+    for (let g = (grade ?? 1) - 1; g >= 0 && !pool.length; g--) {
+      pool = charsByGrade(g)
+    }
+  }
+  if (!pool.length) pool = LITERACY_CHARS
   const filtered = pool.filter((c) => !excludeIds.includes(c.char))
   const source = filtered.length ? filtered : pool
   return toTask(pick(source), mode)

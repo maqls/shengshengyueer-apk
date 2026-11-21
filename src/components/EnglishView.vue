@@ -20,7 +20,7 @@ const result = ref<'correct' | 'wrong' | null>(null)
 const showDetail = ref(false)
 
 function newTask(): void {
-  task.value = nextEnglishTask(mode.value, grade.value ?? 1)
+  task.value = nextEnglishTask(mode.value, grade.value)
   input.value = ''
   result.value = null
   showDetail.value = mode.value === 'card'
@@ -38,10 +38,7 @@ function flip(): void {
 
 function submit(): void {
   if (!task.value || result.value) return
-  if (!input.value.trim()) {
-    app.notify('请先写出单词')
-    return
-  }
+  if (!input.value.trim()) return
   const correct = checkEnglish(task.value, input.value)
   result.value = correct ? 'correct' : 'wrong'
   app.applyTextRecord(makeEnglishRecord(task.value, input.value, 3000))
@@ -105,7 +102,7 @@ onMounted(newTask)
           <div style="margin-top:8px">{{ task.phonetic }} · {{ task.meaning }}</div>
         </div>
         <div class="row" style="margin-top:14px">
-          <button class="btn primary" style="flex:1" :disabled="!!result" @click="submit">提交</button>
+          <button class="btn primary" style="flex:1" :disabled="!!result || !input.trim()" @click="submit">提交</button>
           <button class="btn ghost small" @click="newTask">换一个</button>
         </div>
         <button v-if="result" class="btn ghost block" style="margin-top:10px" @click="newTask">下一个词</button>

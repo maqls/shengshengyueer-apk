@@ -30,10 +30,7 @@ function submit(): void {
     const parsed = Number(inputText.value)
     value = Number.isFinite(parsed) ? parsed : null
   }
-  if (value === null) {
-    store.notify('请先作答')
-    return
-  }
+  if (value === null) return
   submitted.value = true
   store.submit(value)
 }

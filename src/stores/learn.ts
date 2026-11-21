@@ -22,7 +22,6 @@ export const useLearnStore = defineStore('learn', () => {
   const loading = ref(false)
   const isReview = ref(false)
   const startedAt = ref(Date.now())
-  const toast = ref('')
   const mathGrade = ref<number | undefined>(undefined)
 
   const weakPoints = computed(() => weakestKnowledge(masteries.value))
@@ -124,15 +123,10 @@ export const useLearnStore = defineStore('learn', () => {
 
   function setMathGrade(grade: number | undefined): void {
     mathGrade.value = grade
-    notify(grade === undefined ? '数学专项：不限年级' : `数学专项：${grade}年级`)
   }
 
-  function notify(message: string): void {
-    toast.value = message
-    setTimeout(() => {
-      if (toast.value === message) toast.value = ''
-    }, 2500)
-  }
+  // toast 已移除，保留接口兼容旧调用
+  function notify(_message: string): void {}
 
   return {
     current,
@@ -144,7 +138,6 @@ export const useLearnStore = defineStore('learn', () => {
     lastCorrect,
     loading,
     isReview,
-    toast,
     mathGrade,
     setMathGrade,
     weakPoints,

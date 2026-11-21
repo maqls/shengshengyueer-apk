@@ -1,4 +1,4 @@
-import { wordsByGrade, type EnglishWord } from './english-data'
+import { ENGLISH_WORDS, wordsByGrade, type EnglishWord } from './english-data'
 import { pick, uid } from './random'
 import type { AnswerRecord } from './types'
 
@@ -35,10 +35,16 @@ function toTask(item: EnglishWord, mode: EnglishMode): EnglishTask {
 
 export function nextEnglishTask(
   mode: EnglishMode,
-  grade = 1,
+  grade: number | undefined = undefined,
   excludeWords: string[] = []
 ): EnglishTask {
-  const pool = wordsByGrade(grade)
+  let pool = grade === undefined ? ENGLISH_WORDS : wordsByGrade(grade)
+  if (!pool.length) {
+    for (let g = (grade ?? 1) - 1; g >= 0 && !pool.length; g--) {
+      pool = wordsByGrade(g)
+    }
+  }
+  if (!pool.length) pool = ENGLISH_WORDS
   const filtered = pool.filter((w) => !excludeWords.includes(w.word))
   const source = filtered.length ? filtered : pool
   return toTask(pick(source), mode)

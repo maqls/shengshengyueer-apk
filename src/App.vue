@@ -37,6 +37,4 @@ onMounted(async () => {
       <span>{{ t.label }}</span>
     </button>
   </nav>
-
-  <div v-if="store.toast" class="toast">{{ store.toast }}</div>
 </template>

@@ -7,6 +7,11 @@ export interface LiteracyChar {
 }
 
 export const LITERACY_CHARS: LiteracyChar[] = [
+  { char: '人', pinyin: 'rén', grade: 0, words: ['大人', '人们', '人口'], sentence: '公园里有很多人。' },
+  { char: '山', pinyin: 'shān', grade: 0, words: ['大山', '山上', '山河'], sentence: '远处有一座大山。' },
+  { char: '水', pinyin: 'shuǐ', grade: 0, words: ['喝水', '河水', '水杯'], sentence: '我口渴了要喝水。' },
+  { char: '口', pinyin: 'kǒu', grade: 0, words: ['开口', '口水', '门口'], sentence: '请张开嘴巴，用口说话。' },
+  { char: '大', pinyin: 'dà', grade: 0, words: ['大小', '大人', '大象'], sentence: '大象的身体很大。' },
   { char: '一', pinyin: 'yī', grade: 1, words: ['一个', '一天', '第一'], sentence: '我有一个苹果。' },
   { char: '二', pinyin: 'èr', grade: 1, words: ['二月', '第二', '二人'], sentence: '二月天气很冷。' },
   { char: '三', pinyin: 'sān', grade: 1, words: ['三个', '三月', '第三'], sentence: '桌上有三本书。' },

@@ -7,6 +7,10 @@ export interface EnglishWord {
 }
 
 export const ENGLISH_WORDS: EnglishWord[] = [
+  { word: 'hi', phonetic: '/haɪ/', meaning: '你好', grade: 0, sentence: 'Hi, hello!' },
+  { word: 'bye', phonetic: '/baɪ/', meaning: '再见', grade: 0, sentence: 'Bye-bye!' },
+  { word: 'one', phonetic: '/wʌn/', meaning: '一', grade: 0, sentence: 'I have one ball.' },
+  { word: 'two', phonetic: '/tuː/', meaning: '二', grade: 0, sentence: 'I see two birds.' },
   { word: 'apple', phonetic: '/ˈæpl/', meaning: '苹果', grade: 1, sentence: 'I eat an apple.' },
   { word: 'banana', phonetic: '/bəˈnɑːnə/', meaning: '香蕉', grade: 1, sentence: 'The banana is yellow.' },
   { word: 'cat', phonetic: '/kæt/', meaning: '猫', grade: 1, sentence: 'The cat is sleeping.' },

@@ -136,10 +136,7 @@ async function submit(): Promise<void> {
   if (!task.value || result.value) return
   const currentTask = task.value
   const answer = task.value.kind === 'choice' ? selected.value : input.value
-  if (!answer.trim()) {
-    app.notify('请先作答')
-    return
-  }
+  if (!answer.trim()) return
   const correct = checkQuiz(currentTask, answer)
   result.value = correct ? 'correct' : 'wrong'
   app.applyTextRecord(makeQuizRecord(currentTask, answer, 3000))
