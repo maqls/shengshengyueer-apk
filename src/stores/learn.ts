@@ -8,6 +8,7 @@ import { buildReviewItems } from '../core/review'
 import { store } from '../storage/db'
 import { createProviders, explain } from '../llm'
 import { buildExplainSystem, buildExplainUser } from '../llm/explain-prompt'
+import { resolveSettings } from '../llm/resolve'
 import type { LLMProvider } from '../llm/provider'
 
 export const useLearnStore = defineStore('learn', () => {
@@ -78,7 +79,9 @@ export const useLearnStore = defineStore('learn', () => {
 
     loading.value = true
     try {
-      const providers: LLMProvider[] = createProviders(settings.value)
+      const resolved = await resolveSettings(settings.value)
+      settings.value = resolved
+      const providers: LLMProvider[] = createProviders(resolved)
       let fallback = current.value.fallbackExplain
       if (!record.correct) {
         fallback = `${fallback} 正确答案是 ${current.value.answer}。再想想哦。`

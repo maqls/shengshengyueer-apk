@@ -10,6 +10,7 @@ import { shuffle } from '../core/random'
 import { createProviders, explain } from '../llm'
 import { buildExplainSystem, buildExplainUser } from '../llm/explain-prompt'
 import { generateQuizByLLM } from '../llm/quiz-generator'
+import { resolveSettings } from '../llm/resolve'
 import type { LLMProvider } from '../llm/provider'
 
 const app = useLearnStore()
@@ -81,8 +82,11 @@ function effectiveGrade(): number | number[] | undefined {
   if (currentStage.value) return currentStage.value.grades
   return undefined
 }
-function llmProviders(): LLMProvider[] {
-  return app.settings ? createProviders(app.settings) : []
+async function llmProviders(): Promise<LLMProvider[]> {
+  if (!app.settings) return []
+  const resolved = await resolveSettings(app.settings)
+  app.settings = resolved
+  return createProviders(resolved)
 }
 function scopeDesc(): string {
   const s = effectiveSubjects()
@@ -105,7 +109,7 @@ async function newTask(): Promise<void> {
   explainText.value = ''
   explainSource.value = ''
   try {
-    const providers = llmProviders()
+    const providers = await llmProviders()
     let next: QuizTask | null = null
     if (providers.length > 1) {
       const resultGen = await generateQuizByLLM(providers, effectiveSubjects(), effectiveGrade(), historyPrompts.value)
@@ -158,7 +162,7 @@ async function submit(): Promise<void> {
   explainText.value = fallback
   explainSource.value = 'preset'
 
-  const providers = llmProviders()
+  const providers = await llmProviders()
   if (providers.length > 1) {
     const sys = buildExplainSystem()
     const user = buildExplainUser({

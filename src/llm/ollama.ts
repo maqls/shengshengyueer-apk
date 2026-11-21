@@ -29,6 +29,21 @@ export class OllamaProvider implements LLMProvider {
 
   async complete(prompt: string, options: LLMOptions = {}): Promise<string> {
     const system = options.system ?? '你是耐心的小学老师，用孩子能听懂的话分步讲解题目，只讲题目相关内容。'
+    try {
+      return await this.tryEndpoints(system, prompt, options)
+    } catch (firstError) {
+      const msg = firstError instanceof Error ? firstError.message : String(firstError)
+      if (!msg.includes('not found')) throw firstError
+      const available = await this.fetchModelNames()
+      if (!available.length) throw firstError
+      const chosen = available.find((m) => m === this.model) ?? available[0]
+      if (chosen === this.model) throw firstError
+      this.model = chosen
+      return await this.tryEndpoints(system, prompt, options)
+    }
+  }
+
+  private async tryEndpoints(system: string, prompt: string, options: LLMOptions): Promise<string> {
     const order: Endpoint[] = ['openai', 'native', 'generate']
     const idx = order.indexOf(this.preferred)
     const ordered = idx > 0 ? [...order.slice(idx), ...order.slice(0, idx)] : order
@@ -44,6 +59,17 @@ export class OllamaProvider implements LLMProvider {
       }
     }
     throw new LLMError(errors.join('；'), this.name)
+  }
+
+  private async fetchModelNames(): Promise<string[]> {
+    try {
+      const res = await httpRequest(`${this.base}/api/tags`, { timeoutMs: 4000 })
+      if (!res.ok) return []
+      const data = parseJson<{ models?: { name?: string }[] }>(res)
+      return (data.models ?? []).map((m) => m.name).filter((n): n is string => Boolean(n))
+    } catch {
+      return []
+    }
   }
 
   private async call(endpoint: Endpoint, system: string, prompt: string, options: LLMOptions): Promise<string> {
