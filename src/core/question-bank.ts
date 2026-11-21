@@ -35,6 +35,34 @@ export const SUBJECT_LABELS: Record<Subject, string> = {
   thinking: '思维'
 }
 
+export interface GradeStage {
+  key: string
+  label: string
+  grades: number[]
+}
+
+export const GRADE_STAGES: GradeStage[] = [
+  { key: 'preschool', label: '学前', grades: [0] },
+  { key: 'primary', label: '小学', grades: [1, 2, 3, 4, 5, 6] },
+  { key: 'junior', label: '初中', grades: [7, 8, 9] },
+  { key: 'senior', label: '高中', grades: [10, 11, 12] },
+  { key: 'college', label: '大学', grades: [13, 14, 15, 16] },
+  { key: 'graduate', label: '研究生', grades: [17, 18, 19, 20, 21, 22] }
+]
+
+export interface SubjectGroup {
+  key: string
+  label: string
+  subjects: Subject[]
+}
+
+export const SUBJECT_GROUPS: SubjectGroup[] = [
+  { key: 'main', label: '主科', subjects: ['math', 'chinese', 'english'] },
+  { key: 'foundation', label: '启蒙', subjects: ['literacy', 'thinking'] },
+  { key: 'science', label: '理科', subjects: ['science'] },
+  { key: 'humanity', label: '人文', subjects: ['history', 'geography'] }
+]
+
 let seq = 0
 function q(
   subject: Subject,

@@ -72,15 +72,29 @@ export interface GenerateResult {
 
 export async function generateQuizByLLM(
   providers: LLMProvider[],
-  subject: Subject | undefined,
-  grade: number | undefined,
+  subject: Subject | Subject[] | undefined,
+  grade: number | number[] | undefined,
   excludePrompts: string[] = []
 ): Promise<GenerateResult> {
-  const subjectName = subject ? SUBJECT_LABELS[subject] : '各学科综合'
-  const gradeName = grade === undefined ? '不限年级（覆盖小学到初中）' : (GRADE_LABELS[grade] ?? `${grade}年级`)
+  const subjectLabelOne = (s: Subject): string => SUBJECT_LABELS[s] ?? s
+  const subjectName = subject === undefined
+    ? '各学科综合'
+    : Array.isArray(subject)
+      ? subject.map(subjectLabelOne).join('、')
+      : subjectLabelOne(subject)
+  const primarySubject: Subject = subject === undefined
+    ? 'math'
+    : Array.isArray(subject) ? subject[0] : subject
+  const gradeLabel = (g: number): string => GRADE_LABELS[g] ?? `${g}年级`
+  const gradeName = grade === undefined
+    ? '不限年级（覆盖学前到博士）'
+    : Array.isArray(grade)
+      ? `${gradeLabel(grade[0])}至${gradeLabel(grade[grade.length - 1])}`
+      : gradeLabel(grade)
+  const taskGrades = grade === undefined ? [] : Array.isArray(grade) ? grade.slice() : [grade]
 
   const system = [
-    '你是一位耐心的中小学老师，为学生的练习题生成服务。',
+    '你是一位耐心的老师，为从学前到博士各学段学生的练习题生成服务。',
     '只输出一个 JSON 对象，不要输出任何解释文字、不要 markdown 代码块、不要多余前后缀。',
     '题目要准确、适合学生年龄、有教育价值。'
   ].join('')
@@ -104,7 +118,7 @@ export async function generateQuizByLLM(
     if (provider.name === 'fallback') continue
     try {
       const raw = await provider.complete(user, { timeoutMs: 30000, maxTokens: 600, system })
-      const task = parseGeneratedQuestion(raw, subject ?? 'math', grade)
+      const task = parseGeneratedQuestion(raw, primarySubject, grade === undefined ? undefined : taskGrades[0])
       if (!task) {
         reasons.push(`${provider.name}:返回格式无法解析`)
         continue
@@ -113,6 +127,7 @@ export async function generateQuizByLLM(
         reasons.push(`${provider.name}:题目重复`)
         continue
       }
+      if (taskGrades.length) task.grades = taskGrades
       return { task, provider: provider.name, reason: 'ok' }
     } catch (err) {
       reasons.push(`${provider.name}:${err instanceof Error ? err.message : '调用失败'}`)

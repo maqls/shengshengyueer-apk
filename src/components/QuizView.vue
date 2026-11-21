@@ -2,7 +2,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useLearnStore } from '../stores/learn'
 import { nextQuiz, checkQuiz, makeQuizRecord, type QuizTask } from '../core/quiz'
-import { SUBJECT_LABELS, GRADE_LABELS, availableGrades } from '../core/question-bank'
+import {
+  SUBJECT_LABELS, GRADE_LABELS, GRADE_STAGES, SUBJECT_GROUPS, availableGrades
+} from '../core/question-bank'
 import type { Subject } from '../core/types'
 import { shuffle } from '../core/random'
 import { createProviders, explain } from '../llm'
@@ -11,6 +13,8 @@ import { generateQuizByLLM } from '../llm/quiz-generator'
 import type { LLMProvider } from '../llm/provider'
 
 const app = useLearnStore()
+const subjectGroup = ref<string | undefined>(undefined)
+const gradeStage = ref<string | undefined>(undefined)
 const subject = ref<Subject | undefined>(undefined)
 const grade = ref<number | undefined>(undefined)
 const task = ref<QuizTask | null>(null)
@@ -28,16 +32,54 @@ const llmConfigured = computed(() => {
   return !!app.settings && app.settings.llmMode !== 'off'
 })
 
-const allSubjects: (Subject | undefined)[] = [
-  undefined, 'math', 'chinese', 'english', 'literacy', 'science', 'history', 'geography', 'thinking'
-]
-const grades = computed(() => availableGrades())
+const allGrades = computed(() => availableGrades())
+const currentStage = computed(() => GRADE_STAGES.find((s) => s.key === gradeStage.value))
+const currentGroup = computed(() => SUBJECT_GROUPS.find((g) => g.key === subjectGroup.value))
+
+const gradesInStage = computed(() => {
+  if (!currentStage.value) return allGrades.value
+  return allGrades.value.filter((g) => currentStage.value!.grades.includes(g))
+})
+const subjectsInGroup = computed(() => {
+  if (!currentGroup.value) return []
+  return currentGroup.value.subjects
+})
 
 function subjectLabel(s: Subject | undefined): string {
   return s ? SUBJECT_LABELS[s] : '全部学科'
 }
 function gradeLabel(g: number | undefined): string {
   return g === undefined ? '不限年级' : (GRADE_LABELS[g] ?? `${g}年级`)
+}
+
+function chooseGroup(key: string | undefined): void {
+  subjectGroup.value = key
+  subject.value = undefined
+  newTask()
+}
+function chooseSubject(s: Subject | undefined): void {
+  subject.value = s
+  newTask()
+}
+function chooseStage(key: string | undefined): void {
+  gradeStage.value = key
+  grade.value = undefined
+  newTask()
+}
+function chooseGrade(g: number | undefined): void {
+  grade.value = g
+  newTask()
+}
+
+function effectiveSubjects(): Subject | Subject[] | undefined {
+  if (subject.value) return subject.value
+  if (currentGroup.value) return currentGroup.value.subjects
+  return undefined
+}
+function effectiveGrade(): number | number[] | undefined {
+  if (grade.value !== undefined) return grade.value
+  if (currentStage.value) return currentStage.value.grades
+  return undefined
 }
 function llmProviders(): LLMProvider[] {
   return app.settings ? createProviders(app.settings) : []
@@ -54,7 +96,7 @@ async function newTask(): Promise<void> {
     const providers = llmProviders()
     let next: QuizTask | null = null
     if (providers.length > 1) {
-      const resultGen = await generateQuizByLLM(providers, subject.value, grade.value, historyPrompts.value)
+      const resultGen = await generateQuizByLLM(providers, effectiveSubjects(), effectiveGrade(), historyPrompts.value)
       next = resultGen.task
       if (next) {
         source.value = 'llm'
@@ -72,7 +114,7 @@ async function newTask(): Promise<void> {
           : '未配置模型，已用离线题库'
     }
     if (!next) {
-      next = nextQuiz(subject.value, grade.value, historyIds.value)
+      next = nextQuiz(effectiveSubjects(), effectiveGrade(), historyIds.value)
     }
     task.value = next
     if (next) {
@@ -122,6 +164,8 @@ async function submit(): Promise<void> {
 }
 
 function resetFilter(): void {
+  subjectGroup.value = undefined
+  gradeStage.value = undefined
   subject.value = undefined
   grade.value = undefined
   historyIds.value = []
@@ -156,25 +200,47 @@ onMounted(async () => {
     </div>
 
     <div class="card">
-      <h2>选择学科</h2>
+      <h2>学科大类</h2>
       <div class="chips">
+        <button class="chip" :class="{ on: subjectGroup === undefined }" @click="chooseGroup(undefined)">不限</button>
         <button
-          v-for="s in allSubjects"
-          :key="s ?? 'all'"
+          v-for="g in SUBJECT_GROUPS"
+          :key="g.key"
+          class="chip"
+          :class="{ on: subjectGroup === g.key }"
+          @click="chooseGroup(g.key)"
+        >{{ g.label }}</button>
+      </div>
+      <div v-if="currentGroup" class="chips" style="margin-top:8px">
+        <button class="chip" :class="{ on: subject === undefined }" @click="chooseSubject(undefined)">全类</button>
+        <button
+          v-for="s in subjectsInGroup"
+          :key="s"
           class="chip"
           :class="{ on: subject === s }"
-          @click="subject = s; newTask()"
+          @click="chooseSubject(s)"
         >{{ subjectLabel(s) }}</button>
       </div>
-      <h2 style="margin-top:14px">选择年级</h2>
+
+      <h2 style="margin-top:14px">学段</h2>
       <div class="chips">
-        <button class="chip" :class="{ on: grade === undefined }" @click="grade = undefined; newTask()">不限</button>
+        <button class="chip" :class="{ on: gradeStage === undefined }" @click="chooseStage(undefined)">不限</button>
         <button
-          v-for="g in grades"
+          v-for="s in GRADE_STAGES"
+          :key="s.key"
+          class="chip"
+          :class="{ on: gradeStage === s.key }"
+          @click="chooseStage(s.key)"
+        >{{ s.label }}</button>
+      </div>
+      <div v-if="currentStage" class="chips" style="margin-top:8px">
+        <button class="chip" :class="{ on: grade === undefined }" @click="chooseGrade(undefined)">全学段</button>
+        <button
+          v-for="g in gradesInStage"
           :key="g"
           class="chip"
           :class="{ on: grade === g }"
-          @click="grade = g; newTask()"
+          @click="chooseGrade(g)"
         >{{ gradeLabel(g) }}</button>
       </div>
     </div>

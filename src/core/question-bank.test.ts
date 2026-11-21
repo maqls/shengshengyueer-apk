@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
-  BANK, bankQuestions, availableGrades, checkBankAnswer, SUBJECT_LABELS
+  BANK, bankQuestions, availableGrades, checkBankAnswer, SUBJECT_LABELS,
+  GRADE_STAGES, SUBJECT_GROUPS
 } from './question-bank'
 import { nextQuiz, checkQuiz, makeQuizRecord } from './quiz'
 import type { Subject } from './types'
@@ -56,6 +57,21 @@ describe('通用题库', () => {
   it('学科标签齐全', () => {
     for (const q of BANK) expect(SUBJECT_LABELS[q.subject]).toBeTruthy()
   })
+
+  it('学段分组覆盖学前到博士', () => {
+    const all = GRADE_STAGES.flatMap((s) => s.grades)
+    expect(all).toContain(0)
+    expect(all).toContain(6)
+    expect(all).toContain(9)
+    expect(all).toContain(12)
+    expect(all).toContain(16)
+    expect(all).toContain(22)
+  })
+
+  it('学科大类覆盖全部学科', () => {
+    const all = new Set(SUBJECT_GROUPS.flatMap((g) => g.subjects))
+    for (const q of BANK) expect(all.has(q.subject)).toBe(true)
+  })
 })
 
 describe('通用练习引擎', () => {
@@ -64,6 +80,13 @@ describe('通用练习引擎', () => {
     expect(task).not.toBeNull()
     expect(task!.subject).toBe('science')
     expect(task!.grades).toContain(3)
+  })
+
+  it('按学科组与学段数组出题', () => {
+    const task = nextQuiz(['math', 'chinese'], [10, 11, 12])
+    expect(task).not.toBeNull()
+    expect(['math', 'chinese']).toContain(task!.subject)
+    expect(task!.grades.some((g) => [10, 11, 12].includes(g))).toBe(true)
   })
 
   it('不限条件出题', () => {

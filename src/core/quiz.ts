@@ -29,15 +29,20 @@ function toTask(item: BankQuestion): QuizTask {
 }
 
 export function nextQuiz(
-  subject?: Subject,
-  grade?: number,
+  subject?: Subject | Subject[],
+  grade?: number | number[],
   excludeIds: string[] = []
 ): QuizTask | null {
-  let pool = bankQuestions({ subject, grade })
+  const subjects = subject === undefined ? undefined : Array.isArray(subject) ? subject : [subject]
+  const grades = grade === undefined ? undefined : Array.isArray(grade) ? grade : [grade]
+  let pool = bankQuestions()
+  if (subjects) pool = pool.filter((q) => subjects.includes(q.subject))
+  if (grades) pool = pool.filter((q) => q.grades.some((g) => grades.includes(g)))
   const filtered = pool.filter((q) => !excludeIds.includes(q.id))
   if (filtered.length) pool = filtered
   if (!pool.length) {
-    pool = bankQuestions(subject ? { subject } : {})
+    pool = bankQuestions()
+    if (subjects) pool = pool.filter((q) => subjects.includes(q.subject))
   }
   if (!pool.length) return null
   return toTask(pick(pool))
