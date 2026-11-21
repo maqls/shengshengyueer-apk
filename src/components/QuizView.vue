@@ -11,7 +11,7 @@ import { createProviders, explain } from '../llm'
 import { buildExplainSystem, buildExplainUser } from '../llm/explain-prompt'
 import { generateQuizByLLM } from '../llm/quiz-generator'
 import { resolveSettings } from '../llm/resolve'
-import { quizPrefetcher } from '../llm/prefetch'
+import { quizPrefetcher, prefetchState } from '../llm/prefetch'
 import type { LLMProvider } from '../llm/provider'
 
 const app = useLearnStore()
@@ -245,6 +245,15 @@ onMounted(async () => {
     <div class="card" style="padding:10px 12px">
       <div class="source-tag" style="line-height:1.7">
         模型状态：{{ llmConfigured ? '已配置' : '未配置/纯离线' }} · {{ llmStatus || '点击出题后将调用模型' }}
+        <template v-if="llmConfigured && prefetchState.warming">
+          <br /><span style="color:var(--accent)">⏳ 后台正在预热电脑模型（首次加载需 1–2 分钟，不耽误你做当前题）…</span>
+        </template>
+        <template v-else-if="llmConfigured && prefetchState.filling">
+          <br /><span style="color:var(--accent)">⚙ 后台正在预生成下一题（已有 {{ prefetchState.cached }} 道），当前题不受影响</span>
+        </template>
+        <template v-else-if="llmConfigured && prefetchState.cached > 0">
+          <br /><span style="color:var(--ok)">✓ 已预生成 {{ prefetchState.cached }} 道，点「下一题」秒出</span>
+        </template>
         <template v-if="app.settings">
           <br />生效配置：{{ app.settings.llmMode === 'local' ? `电脑本地 ${app.settings.ollamaBaseUrl} (${app.settings.ollamaModel})` : app.settings.llmMode === 'cloud' ? `云端 ${app.settings.cloudModel}` : '纯离线' }}
         </template>
