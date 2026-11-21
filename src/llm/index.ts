@@ -45,3 +45,5 @@ export async function explain(
 }
 
 export type { LLMProvider } from './provider'
+export { OllamaProvider } from './ollama'
+export { CloudProvider } from './cloud'

@@ -84,6 +84,18 @@ function effectiveGrade(): number | number[] | undefined {
 function llmProviders(): LLMProvider[] {
   return app.settings ? createProviders(app.settings) : []
 }
+function scopeDesc(): string {
+  const s = effectiveSubjects()
+  const g = effectiveGrade()
+  const subj = s === undefined ? '全部学科' : Array.isArray(s) ? s.map((x) => SUBJECT_LABELS[x]).join('/') : SUBJECT_LABELS[s]
+  let grd = '不限年级'
+  if (Array.isArray(g)) {
+    grd = g.length ? `${gradeLabel(g[0])}~${gradeLabel(g[g.length - 1])}` : grd
+  } else if (g !== undefined) {
+    grd = gradeLabel(g)
+  }
+  return `${subj} · ${grd}`
+}
 
 async function newTask(): Promise<void> {
   generating.value = true
@@ -100,10 +112,10 @@ async function newTask(): Promise<void> {
       next = resultGen.task
       if (next) {
         source.value = 'llm'
-        llmStatus.value = `已通过 ${resultGen.provider} 出题`
+        llmStatus.value = `已通过 ${resultGen.provider} 出题（${scopeDesc()}）`
       } else {
         source.value = 'bank'
-        llmStatus.value = `模型出题失败，已用离线题库：${resultGen.reason}`
+        llmStatus.value = `模型出题失败，已用离线题库：${resultGen.reason}（${scopeDesc()}）`
       }
     } else {
       source.value = 'bank'
@@ -196,6 +208,9 @@ onMounted(async () => {
     <div class="card" style="padding:10px 12px">
       <div class="source-tag" style="line-height:1.7">
         模型状态：{{ llmConfigured ? '已配置' : '未配置/纯离线' }} · {{ llmStatus || '点击出题后将调用模型' }}
+        <template v-if="app.settings">
+          <br />生效配置：{{ app.settings.llmMode === 'local' ? `电脑本地 ${app.settings.ollamaBaseUrl} (${app.settings.ollamaModel})` : app.settings.llmMode === 'cloud' ? `云端 ${app.settings.cloudModel}` : '纯离线' }}
+        </template>
       </div>
     </div>
 

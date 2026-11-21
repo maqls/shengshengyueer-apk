@@ -2,12 +2,15 @@
 import { reactive, onMounted, ref } from 'vue'
 import { useLearnStore } from '../stores/learn'
 import { store as db, DEFAULT_SETTINGS, exportAll, importAll } from '../storage/db'
+import { OllamaProvider, CloudProvider } from '../llm'
 import type { Settings } from '../core/types'
 
 const app = useLearnStore()
 const form = reactive<Settings>({ ...DEFAULT_SETTINGS })
 const saved = reactive({ value: false })
 const fileInput = ref<HTMLInputElement | null>(null)
+const testResult = ref('')
+const testing = ref(false)
 
 onMounted(async () => {
   const settings = await db.getSettings()
@@ -51,8 +54,29 @@ async function save(): Promise<void> {
   setTimeout(() => (saved.value = false), 2000)
 }
 
-function testLocal(): void {
-  app.notify('请先保存设置，再在练习中验证讲解来源')
+async function testLocal(): Promise<void> {
+  testing.value = true
+  testResult.value = '正在连接…'
+  try {
+    const provider = form.llmMode === 'cloud'
+      ? new CloudProvider(form.cloudBaseUrl, form.cloudModel, form.cloudApiKey)
+      : new OllamaProvider(form.ollamaBaseUrl, form.ollamaModel)
+    if (form.llmMode === 'off') {
+      testResult.value = '当前是纯离线模式，不会调用模型。请切换到电脑本地或云端。'
+      return
+    }
+    const ok = await provider.isAvailable()
+    if (!ok) {
+      testResult.value = `连接失败：无法访问 ${form.llmMode === 'cloud' ? form.cloudBaseUrl : form.ollamaBaseUrl}。\n请检查：电脑 Ollama 是否运行、地址是否为 http://电脑IP:11434、手机与电脑是否同 WiFi、防火墙是否放行 11434。`
+      return
+    }
+    const text = await provider.complete('请只回复两个字：正常', { timeoutMs: 20000, maxTokens: 20 })
+    testResult.value = `成功：模型 ${form.llmMode === 'cloud' ? form.cloudModel : form.ollamaModel} 已响应。\n返回内容：${text}`
+  } catch (e) {
+    testResult.value = `调用出错：${e instanceof Error ? e.message : String(e)}`
+  } finally {
+    testing.value = false
+  }
 }
 </script>
 
@@ -110,6 +134,10 @@ function testLocal(): void {
       </div>
 
       <button class="btn primary block" @click="save">{{ saved ? '已保存 ✓' : '保存设置' }}</button>
+      <button class="btn ghost block" style="margin-top:10px" :disabled="testing" @click="testLocal">
+        {{ testing ? '测试中…' : '测试模型连接' }}
+      </button>
+      <div v-if="testResult" class="explain" style="white-space:pre-wrap;margin-top:10px">{{ testResult }}</div>
     </div>
 
     <div class="card">
