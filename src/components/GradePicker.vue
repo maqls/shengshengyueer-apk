@@ -36,7 +36,6 @@ function label(g: number): string {
       >{{ s.label }}</button>
     </div>
     <div v-if="currentStage" class="chips" style="margin-top:8px">
-      <button class="chip" :class="{ on: modelValue === undefined }" @click="chooseGrade(undefined)">全学段</button>
       <button
         v-for="g in gradesInStage"
         :key="g"

@@ -104,11 +104,7 @@ async function newTask(): Promise<void> {
         const resultGen = await generateQuizByLLM(providers, effectiveSubjects(), effectiveGrade(), historyPrompts.value)
         next = resultGen.task
       }
-      if (next) {
-        source.value = 'llm'
-      } else {
-        source.value = 'bank'
-      }
+      source.value = next?.id.startsWith('ai-') ? 'llm' : 'bank'
     } else {
       source.value = 'bank'
     }
@@ -184,7 +180,7 @@ onMounted(async () => {
     const cached = quizPrefetcher.take(effectiveSubjects(), effectiveGrade())
     if (cached) {
       task.value = cached
-      source.value = 'llm'
+      source.value = cached.id.startsWith('ai-') ? 'llm' : 'bank'
     } else {
       task.value = nextQuiz(effectiveSubjects(), effectiveGrade(), historyIds.value)
       source.value = 'bank'

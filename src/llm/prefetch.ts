@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import type { LLMProvider } from './provider'
 import { generateQuizByLLM } from './quiz-generator'
-import type { QuizTask } from '../core/quiz'
+import { nextQuiz, type QuizTask } from '../core/quiz'
 import type { Subject } from '../core/types'
 
 const CACHE_SIZE = 3
@@ -89,8 +89,14 @@ export class QuizPrefetcher {
           grade,
           [...exclude, ...this.cache.map((q) => q.prompt)]
         )
-        if (!result.task) break
-        this.cache.push(result.task)
+        if (result.task) {
+          this.cache.push(result.task)
+        } else {
+          // 模型失败时用题库题填充缓存，保证「下一题」永远秒出
+          const bankTask = nextQuiz(subject, grade, this.cache.map((q) => q.id))
+          if (!bankTask) break
+          this.cache.push(bankTask)
+        }
         this.sync()
       }
     } finally {
