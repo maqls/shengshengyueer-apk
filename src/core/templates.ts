@@ -152,6 +152,66 @@ export const TEMPLATES: QuestionTemplate[] = [
     answer: '10',
     explainPrompt: '这是特殊角三角函数。sin30°=0.5，cos60°=0.5，相加等于 1.0。用高一孩子能懂的话。',
     fallbackExplain: 'sin30°=cos60°=0.5，和为 1。'
+  },
+  {
+    id: 'quadratic',
+    knowledge: ['quadratic'],
+    grade: 11,
+    difficulty: 3,
+    type: 'number',
+    params: { r: { min: 1, max: 9 } },
+    question: '方程 x² - {r}x = 0 的两个根之和是？',
+    answer: '{r}',
+    explainPrompt: '由韦达定理，x²-{r}x=0 的两根之和等于 {r}。用高二孩子能懂的话。',
+    fallbackExplain: '一元二次方程两根之和等于一次项系数的相反数。'
+  },
+  {
+    id: 'derivative',
+    knowledge: ['derivative'],
+    grade: 12,
+    difficulty: 3,
+    type: 'number',
+    params: { a: { min: 2, max: 9 } },
+    question: 'f(x) = x³，则 f′({a}) = 3×{a}² = ?',
+    answer: '3 * {a} * {a}',
+    explainPrompt: '幂函数求导：f(x)=x³ 的导数是 3x²。代入 x={a}，得 3×{a}²={a}*{a}*3。用高三孩子能懂的话。',
+    fallbackExplain: 'x^n 的导数是 n·x^(n-1)。'
+  },
+  {
+    id: 'matrix_det',
+    knowledge: ['linear_algebra'],
+    grade: 14,
+    difficulty: 3,
+    type: 'number',
+    params: { a: { min: 1, max: 9 }, b: { min: 1, max: 9 } },
+    question: '二阶行列式 |{a} 0; 0 {b}| 的值 = ?',
+    answer: '{a} * {b}',
+    explainPrompt: '二阶对角行列式的值等于主对角线元素之积：{a}×{b}={a}*{b}。用大一孩子能懂的话。',
+    fallbackExplain: '对角矩阵的行列式等于对角元素相乘。'
+  },
+  {
+    id: 'mod_inverse',
+    knowledge: ['number_theory'],
+    grade: 17,
+    difficulty: 3,
+    type: 'number',
+    params: { a: { min: 4, max: 7 } },
+    question: '{a} × 3 mod 11 的余数 = ?（a 为 4~7）',
+    answer: '{a} * 3 - 11',
+    explainPrompt: '这是模运算。先算 {a}×3={a}*3，再减去 11 得余数 {a}*3-11。用研一孩子能懂的话。',
+    fallbackExplain: '模运算 a mod m 是 a 除以 m 的余数。'
+  },
+  {
+    id: 'entropy',
+    knowledge: ['information_theory'],
+    grade: 20,
+    difficulty: 3,
+    type: 'number',
+    params: {},
+    question: '抛一枚公平硬币的信息熵是几位？（0 或 1，填整数）',
+    answer: '1',
+    explainPrompt: '公平二值随机变量的信息熵为 log2(2)=1 比特。用博士阶段能懂的话讲清信息量与熵的关系。',
+    fallbackExplain: '等概率二值信源的熵是 1 比特。'
   }
 ]
 

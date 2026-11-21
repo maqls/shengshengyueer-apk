@@ -56,7 +56,13 @@ export const LITERACY_CHARS: LiteracyChar[] = [
   { char: '值', pinyin: 'zhí', grade: 4, words: ['值日', '价值', '值得'], sentence: '今天我值日。' },
   { char: '貌', pinyin: 'mào', grade: 5, words: ['礼貌', '面貌', '外貌'], sentence: '我们要讲礼貌。' },
   { char: '慧', pinyin: 'huì', grade: 5, words: ['智慧', '聪慧', '慧眼'], sentence: '智慧来自学习。' },
-  { char: '德', pinyin: 'dé', grade: 6, words: ['品德', '道德', '美德'], sentence: '良好的品德很重要。' }
+  { char: '德', pinyin: 'dé', grade: 6, words: ['品德', '道德', '美德'], sentence: '良好的品德很重要。' },
+  { char: '毅', pinyin: 'yì', grade: 7, words: ['毅力', '坚毅', '刚毅'], sentence: '学习需要毅力。' },
+  { char: '涵', pinyin: 'hán', grade: 8, words: ['内涵', '涵养', '海涵'], sentence: '这篇文章很有内涵。' },
+  { char: '睿', pinyin: 'ruì', grade: 10, words: ['睿智', '聪睿', '睿见'], sentence: '他是一位睿智的学者。' },
+  { char: '博', pinyin: 'bó', grade: 13, words: ['博学', '广博', '渊博'], sentence: '博学多才的人受人尊敬。' },
+  { char: '研', pinyin: 'yán', grade: 17, words: ['研究', '钻研', '研讨'], sentence: '科学研究需要严谨。' },
+  { char: '笃', pinyin: 'dǔ', grade: 20, words: ['笃定', '笃行', '诚笃'], sentence: '笃行致远，践行所学。' }
 ]
 
 export function charsByGrade(grade: number): LiteracyChar[] {

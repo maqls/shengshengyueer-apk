@@ -9,17 +9,18 @@ import {
   type LiteracyMode
 } from '../core/literacy'
 import { speakChinese, speechSupported } from '../core/speech'
+import GradePicker from './GradePicker.vue'
 
 const app = useLearnStore()
 const mode = ref<LiteracyMode>('card')
-const grade = ref(1)
+const grade = ref<number | undefined>(undefined)
 const task = ref<LiteracyTask | null>(null)
 const input = ref('')
 const result = ref<'correct' | 'wrong' | null>(null)
 const showDetail = ref(false)
 
 function newTask(): void {
-  task.value = nextLiteracyTask(mode.value, grade.value)
+  task.value = nextLiteracyTask(mode.value, grade.value ?? 1)
   input.value = ''
   result.value = null
   showDetail.value = mode.value === 'card'
@@ -65,7 +66,7 @@ onMounted(newTask)
         <button :class="{ on: mode === 'dictation' }" @click="changeMode('dictation')">听写</button>
       </div>
       <div class="segment">
-        <button v-for="g in [1,2,3,4,5,6]" :key="g" :class="{ on: grade === g }" @click="grade = g; newTask()">{{ g }}年级</button>
+        <GradePicker :model-value="grade" @update:model-value="(g) => { grade = g; newTask() }" />
       </div>
     </div>
 

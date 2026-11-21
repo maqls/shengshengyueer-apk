@@ -35,7 +35,13 @@ export const ENGLISH_WORDS: EnglishWord[] = [
   { word: 'because', phonetic: '/bɪˈkɒz/', meaning: '因为', grade: 3, sentence: 'I stay home because it rains.' },
   { word: 'important', phonetic: '/ɪmˈpɔːtnt/', meaning: '重要的', grade: 4, sentence: 'Study is important.' },
   { word: 'although', phonetic: '/ɔːlˈðəʊ/', meaning: '虽然', grade: 5, sentence: 'Although it is late, I study.' },
-  { word: 'environment', phonetic: '/ɪnˈvaɪrənmənt/', meaning: '环境', grade: 6, sentence: 'We protect the environment.' }
+  { word: 'environment', phonetic: '/ɪnˈvaɪrənmənt/', meaning: '环境', grade: 6, sentence: 'We protect the environment.' },
+  { word: 'achieve', phonetic: '/əˈtʃiːv/', meaning: '实现', grade: 7, sentence: 'Work hard to achieve your goal.' },
+  { word: 'significant', phonetic: '/sɪɡˈnɪfɪkənt/', meaning: '重要的', grade: 9, sentence: 'This is a significant discovery.' },
+  { word: 'philosophy', phonetic: '/fɪˈlɒsəfi/', meaning: '哲学', grade: 11, sentence: 'He studies philosophy.' },
+  { word: 'analysis', phonetic: '/əˈnæləsɪs/', meaning: '分析', grade: 14, sentence: 'Data analysis is essential.' },
+  { word: 'hypothesis', phonetic: '/haɪˈpɒθəsɪs/', meaning: '假设', grade: 17, sentence: 'We test the hypothesis.' },
+  { word: 'paradigm', phonetic: '/ˈpærədaɪm/', meaning: '范式', grade: 20, sentence: 'A new research paradigm emerged.' }
 ]
 
 export function wordsByGrade(grade: number): EnglishWord[] {
