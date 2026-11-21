@@ -117,7 +117,7 @@ export async function generateQuizByLLM(
   for (const provider of providers) {
     if (provider.name === 'fallback') continue
     try {
-      const raw = await provider.complete(user, { timeoutMs: 180000, maxTokens: 300, system })
+      const raw = await provider.complete(user, { timeoutMs: 180000, maxTokens: 600, system })
       const task = parseGeneratedQuestion(raw, primarySubject, grade === undefined ? undefined : taskGrades[0])
       if (!task) {
         reasons.push(`${provider.name}:返回格式无法解析`)

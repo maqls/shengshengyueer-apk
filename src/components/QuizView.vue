@@ -11,7 +11,7 @@ import { createProviders, explain } from '../llm'
 import { buildExplainSystem, buildExplainUser } from '../llm/explain-prompt'
 import { generateQuizByLLM } from '../llm/quiz-generator'
 import { resolveSettings } from '../llm/resolve'
-import { quizPrefetcher, prefetchState } from '../llm/prefetch'
+import { quizPrefetcher } from '../llm/prefetch'
 import type { LLMProvider } from '../llm/provider'
 
 const app = useLearnStore()
@@ -29,10 +29,6 @@ const source = ref<'llm' | 'bank'>('bank')
 const explainText = ref('')
 const explainSource = ref('')
 const generating = ref(false)
-const llmStatus = ref('')
-const llmConfigured = computed(() => {
-  return !!app.settings && app.settings.llmMode !== 'off'
-})
 
 const allGrades = computed(() => availableGrades())
 const currentStage = computed(() => GRADE_STAGES.find((s) => s.key === gradeStage.value))
@@ -89,18 +85,6 @@ async function llmProviders(): Promise<LLMProvider[]> {
   app.settings = resolved
   return createProviders(resolved)
 }
-function scopeDesc(): string {
-  const s = effectiveSubjects()
-  const g = effectiveGrade()
-  const subj = s === undefined ? '全部学科' : Array.isArray(s) ? s.map((x) => SUBJECT_LABELS[x]).join('/') : SUBJECT_LABELS[s]
-  let grd = '不限年级'
-  if (Array.isArray(g)) {
-    grd = g.length ? `${gradeLabel(g[0])}~${gradeLabel(g[g.length - 1])}` : grd
-  } else if (g !== undefined) {
-    grd = gradeLabel(g)
-  }
-  return `${subj} · ${grd}`
-}
 
 async function newTask(): Promise<void> {
   generating.value = true
@@ -116,27 +100,17 @@ async function newTask(): Promise<void> {
 
     if (hasLLM) {
       next = quizPrefetcher.take(effectiveSubjects(), effectiveGrade())
-      if (next) {
-        source.value = 'llm'
-        llmStatus.value = `预生成题目（秒出，缓存剩 ${quizPrefetcher.size()}）· ${scopeDesc()}`
-      } else {
+      if (!next) {
         const resultGen = await generateQuizByLLM(providers, effectiveSubjects(), effectiveGrade(), historyPrompts.value)
         next = resultGen.task
-        if (next) {
-          source.value = 'llm'
-          llmStatus.value = `已通过 ${resultGen.provider} 出题（${scopeDesc()}）`
-        } else {
-          source.value = 'bank'
-          llmStatus.value = `模型出题失败，已用离线题库：${resultGen.reason}（${scopeDesc()}）`
-        }
+      }
+      if (next) {
+        source.value = 'llm'
+      } else {
+        source.value = 'bank'
       }
     } else {
       source.value = 'bank'
-      llmStatus.value = !app.settings
-        ? '设置尚未加载完成，已用离线题库'
-        : app.settings.llmMode === 'off'
-          ? '已设为纯离线模式，不调用模型'
-          : '未配置模型，已用离线题库'
     }
     if (!next) {
       next = nextQuiz(effectiveSubjects(), effectiveGrade(), historyIds.value)
@@ -214,11 +188,9 @@ onMounted(async () => {
     if (cached) {
       task.value = cached
       source.value = 'llm'
-      llmStatus.value = `预生成题目（秒出）· ${scopeDesc()}`
     } else {
       task.value = nextQuiz(effectiveSubjects(), effectiveGrade(), historyIds.value)
       source.value = 'bank'
-      llmStatus.value = '本地题库先出题，电脑模型正在后台预热与预生成…'
     }
     if (task.value) {
       historyIds.value.push(task.value.id)
@@ -239,24 +211,6 @@ onMounted(async () => {
       <div>
         <h1>📚 综合学习</h1>
         <div class="sub">全年级 · 多学科 · 电脑模型动态出题</div>
-      </div>
-    </div>
-
-    <div class="card" style="padding:10px 12px">
-      <div class="source-tag" style="line-height:1.7">
-        模型状态：{{ llmConfigured ? '已配置' : '未配置/纯离线' }} · {{ llmStatus || '点击出题后将调用模型' }}
-        <template v-if="llmConfigured && prefetchState.warming">
-          <br /><span style="color:var(--accent)">⏳ 后台正在预热电脑模型（首次加载需 1–2 分钟，不耽误你做当前题）…</span>
-        </template>
-        <template v-else-if="llmConfigured && prefetchState.filling">
-          <br /><span style="color:var(--accent)">⚙ 后台正在预生成下一题（已有 {{ prefetchState.cached }} 道），当前题不受影响</span>
-        </template>
-        <template v-else-if="llmConfigured && prefetchState.cached > 0">
-          <br /><span style="color:var(--ok)">✓ 已预生成 {{ prefetchState.cached }} 道，点「下一题」秒出</span>
-        </template>
-        <template v-if="app.settings">
-          <br />生效配置：{{ app.settings.llmMode === 'local' ? `电脑本地 ${app.settings.ollamaBaseUrl} (${app.settings.ollamaModel})` : app.settings.llmMode === 'cloud' ? `云端 ${app.settings.cloudModel}` : '纯离线' }}
-        </template>
       </div>
     </div>
 
@@ -352,9 +306,6 @@ onMounted(async () => {
           </span>
         </div>
         <div style="margin-top:8px">{{ explainText }}</div>
-        <div class="source-tag">
-          讲解来源：{{ { ollama: '电脑本地模型', cloud: '云端模型', preset: '预设解析', fallback: '预设解析', cache: '缓存' }[explainSource] ?? explainSource }}
-        </div>
         <button class="btn primary block" style="margin-top:12px" @click="newTask">下一题</button>
       </div>
     </div>

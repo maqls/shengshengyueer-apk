@@ -29,8 +29,10 @@ export class OllamaProvider implements LLMProvider {
 
   async complete(prompt: string, options: LLMOptions = {}): Promise<string> {
     const system = options.system ?? '你是一位耐心的老师，面向从学前到博士各学段的学生，用对方能听懂的话分步讲解题目，只讲题目相关内容。'
+    // qwen3 系列默认开启思考模式，会耗尽 token 导致正文为空；/no_think 关闭思考
+    const sys = `${system}\n/no_think`
     try {
-      return await this.tryEndpoints(system, prompt, options)
+      return await this.tryEndpoints(sys, prompt, options)
     } catch (firstError) {
       const msg = firstError instanceof Error ? firstError.message : String(firstError)
       if (!msg.includes('not found')) throw firstError
@@ -39,7 +41,7 @@ export class OllamaProvider implements LLMProvider {
       const chosen = available.find((m) => m === this.model) ?? available[0]
       if (chosen === this.model) throw firstError
       this.model = chosen
-      return await this.tryEndpoints(system, prompt, options)
+      return await this.tryEndpoints(sys, prompt, options)
     }
   }
 
@@ -86,6 +88,7 @@ export class OllamaProvider implements LLMProvider {
           model: this.model,
           messages: [{ role: 'system', content: system }, { role: 'user', content: prompt }],
           stream: false,
+          think: false,
           options: { temperature: 0.3, num_predict: options.maxTokens ?? 500 }
         }
     const url = endpoint === 'openai'
@@ -99,16 +102,24 @@ export class OllamaProvider implements LLMProvider {
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     if (endpoint === 'openai') {
-      const data = parseJson<{ choices?: { message?: { content?: string } }[]; error?: string }>(res)
+      const data = parseJson<{
+        choices?: { message?: { content?: string; reasoning?: string; reasoning_content?: string } }[]
+        error?: string
+      }>(res)
       if (data.error) throw new Error(data.error)
-      const content = data.choices?.[0]?.message?.content
-      if (!content) throw new Error('返回内容为空')
-      return content.trim()
+      const message = data.choices?.[0]?.message
+      const content = message?.content?.trim()
+      // content 为空时兜底：思考内容里可能已含答案
+      const fallback = message?.reasoning ?? message?.reasoning_content
+      if (!content && !fallback) throw new Error('返回内容为空')
+      return (content || fallback || '').trim()
     }
-    const data = parseJson<{ message?: { content?: string }; error?: string }>(res)
+    const data = parseJson<{ message?: { content?: string; thinking?: string; reasoning?: string }; error?: string }>(res)
     if (data.error) throw new Error(data.error)
-    if (!data.message?.content) throw new Error('返回内容为空')
-    return data.message.content.trim()
+    const nativeContent = data.message?.content?.trim()
+    const nativeFallback = data.message?.thinking ?? data.message?.reasoning
+    if (!nativeContent && !nativeFallback) throw new Error('返回内容为空')
+    return (nativeContent || nativeFallback || '').trim()
   }
 
   private async completeGenerate(system: string, prompt: string, options: LLMOptions): Promise<string> {
@@ -116,6 +127,7 @@ export class OllamaProvider implements LLMProvider {
       model: this.model,
       prompt: `${system}\n\n${prompt}`,
       stream: false,
+      think: false,
       options: { temperature: 0.3, num_predict: options.maxTokens ?? 500 }
     }
     const res = await httpRequest(`${this.base}/api/generate`, {
@@ -125,9 +137,11 @@ export class OllamaProvider implements LLMProvider {
       timeoutMs: options.timeoutMs ?? 180000
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const data = parseJson<{ response?: string; error?: string }>(res)
+    const data = parseJson<{ response?: string; thinking?: string; reasoning?: string; error?: string }>(res)
     if (data.error) throw new Error(data.error)
-    if (!data.response) throw new Error('返回内容为空')
-    return data.response.trim()
+    const content = data.response?.trim()
+    const fallback = data.thinking ?? data.reasoning
+    if (!content && !fallback) throw new Error('返回内容为空')
+    return (content || fallback || '').trim()
   }
 }
