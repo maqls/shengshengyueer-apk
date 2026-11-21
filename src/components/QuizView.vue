@@ -11,6 +11,7 @@ import { createProviders, explain } from '../llm'
 import { buildExplainSystem, buildExplainUser } from '../llm/explain-prompt'
 import { generateQuizByLLM } from '../llm/quiz-generator'
 import { resolveSettings } from '../llm/resolve'
+import { quizPrefetcher } from '../llm/prefetch'
 import type { LLMProvider } from '../llm/provider'
 
 const app = useLearnStore()
@@ -110,16 +111,24 @@ async function newTask(): Promise<void> {
   explainSource.value = ''
   try {
     const providers = await llmProviders()
+    const hasLLM = providers.length > 1
     let next: QuizTask | null = null
-    if (providers.length > 1) {
-      const resultGen = await generateQuizByLLM(providers, effectiveSubjects(), effectiveGrade(), historyPrompts.value)
-      next = resultGen.task
+
+    if (hasLLM) {
+      next = quizPrefetcher.take(effectiveSubjects(), effectiveGrade())
       if (next) {
         source.value = 'llm'
-        llmStatus.value = `已通过 ${resultGen.provider} 出题（${scopeDesc()}）`
+        llmStatus.value = `预生成题目（秒出，缓存剩 ${quizPrefetcher.size()}）· ${scopeDesc()}`
       } else {
-        source.value = 'bank'
-        llmStatus.value = `模型出题失败，已用离线题库：${resultGen.reason}（${scopeDesc()}）`
+        const resultGen = await generateQuizByLLM(providers, effectiveSubjects(), effectiveGrade(), historyPrompts.value)
+        next = resultGen.task
+        if (next) {
+          source.value = 'llm'
+          llmStatus.value = `已通过 ${resultGen.provider} 出题（${scopeDesc()}）`
+        } else {
+          source.value = 'bank'
+          llmStatus.value = `模型出题失败，已用离线题库：${resultGen.reason}（${scopeDesc()}）`
+        }
       }
     } else {
       source.value = 'bank'
@@ -136,6 +145,9 @@ async function newTask(): Promise<void> {
     if (next) {
       historyIds.value.push(next.id)
       historyPrompts.value.push(next.prompt)
+    }
+    if (hasLLM) {
+      void quizPrefetcher.fill(providers, effectiveSubjects(), effectiveGrade(), historyPrompts.value)
     }
   } finally {
     generating.value = false
@@ -196,7 +208,28 @@ const options = computed(() => {
 
 onMounted(async () => {
   if (!app.settings) await app.init()
-  await newTask()
+  const providers = await llmProviders()
+  if (providers.length > 1) {
+    const cached = quizPrefetcher.take(effectiveSubjects(), effectiveGrade())
+    if (cached) {
+      task.value = cached
+      source.value = 'llm'
+      llmStatus.value = `预生成题目（秒出）· ${scopeDesc()}`
+    } else {
+      task.value = nextQuiz(effectiveSubjects(), effectiveGrade(), historyIds.value)
+      source.value = 'bank'
+      llmStatus.value = '本地题库先出题，电脑模型正在后台预热与预生成…'
+    }
+    if (task.value) {
+      historyIds.value.push(task.value.id)
+      historyPrompts.value.push(task.value.prompt)
+    }
+    void quizPrefetcher.warmup(providers).then(() =>
+      quizPrefetcher.fill(providers, effectiveSubjects(), effectiveGrade(), historyPrompts.value)
+    )
+  } else {
+    await newTask()
+  }
 })
 </script>
 
