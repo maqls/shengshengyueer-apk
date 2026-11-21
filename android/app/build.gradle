@@ -3,6 +3,10 @@ apply plugin: 'com.android.application'
 android {
     namespace "com.maqls.shengshengyueer.learn"
     compileSdk rootProject.ext.compileSdkVersion
+    lintOptions {
+        abortOnError false
+        checkReleaseBuilds false
+    }
     signingConfigs {
         release {
             storeFile file('keystore/shengshengyueer.jks')

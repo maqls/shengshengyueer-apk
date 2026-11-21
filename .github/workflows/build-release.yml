@@ -54,7 +54,19 @@ jobs:
 
       - name: Build signed release APK
         working-directory: android
-        run: chmod +x gradlew && ./gradlew assembleRelease --no-daemon
+        run: |
+          chmod +x gradlew
+          for i in 1 2 3; do
+            echo "构建尝试 $i/3"
+            if ./gradlew assembleRelease --no-daemon; then
+              echo "构建成功"
+              exit 0
+            fi
+            echo "构建失败，重试中…"
+            sleep 10
+          done
+          echo "构建三次均失败"
+          exit 1
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
