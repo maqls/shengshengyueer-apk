@@ -81,7 +81,10 @@ async function testLocal(): Promise<void> {
       return
     }
     const text = await provider.complete('请只回复两个字：正常', { timeoutMs: 20000, maxTokens: 20 })
-    testResult.value = `成功：模型 ${form.llmMode === 'cloud' ? form.cloudModel : form.ollamaModel} 已响应。\n返回内容：${text}`
+    const extra = provider instanceof OllamaProvider
+      ? `\n接口：${provider.lastEndpoint() === 'openai' ? '/v1/chat/completions' : '/api/chat（原生，已自动降级）'}`
+      : ''
+    testResult.value = `成功：模型 ${form.llmMode === 'cloud' ? form.cloudModel : form.ollamaModel} 已响应。${extra}\n返回内容：${text}`
   } catch (e) {
     testResult.value = `调用出错：${e instanceof Error ? e.message : String(e)}`
   } finally {
