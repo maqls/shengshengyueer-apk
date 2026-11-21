@@ -21,7 +21,7 @@ export class CloudProvider implements LLMProvider {
   }
 
   async complete(prompt: string, options: LLMOptions = {}): Promise<string> {
-    const system = options.system ?? '你是耐心的小学老师，用孩子能听懂的话分步讲解题目，只讲题目相关内容。'
+    const system = options.system ?? '你是一位耐心的老师，面向从学前到博士各学段的学生，用对方能听懂的话分步讲解题目，只讲题目相关内容。'
     const body = {
       model: this.model,
       messages: [
