@@ -264,7 +264,7 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div v-if="generating" class="card empty">电脑模型正在出题…</div>
+    <div v-if="generating" class="card empty">电脑模型正在出题…<br />首次使用需加载模型，可能要 1–2 分钟，请耐心等待。</div>
 
     <div v-else-if="task" class="card">
       <div class="row tight" style="justify-content:space-between;align-items:center">

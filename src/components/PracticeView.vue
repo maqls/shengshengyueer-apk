@@ -102,7 +102,7 @@ onMounted(() => {
             正确答案 {{ store.current.answer }}
           </span>
         </div>
-        <div class="explain">{{ store.explanation || (store.loading ? '讲解生成中…' : '') }}</div>
+        <div class="explain">{{ store.explanation || (store.loading ? '讲解生成中…（本地模型首次加载可能需 1–2 分钟）' : '') }}</div>
         <div v-if="store.explainSource" class="source-tag">
           讲解来源：{{ { ollama: '电脑本地模型', cloud: '云端模型', fallback: '预设解析', cache: '缓存', preset: '预设' }[store.explainSource] ?? store.explainSource }}
         </div>

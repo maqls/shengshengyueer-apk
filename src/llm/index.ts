@@ -35,7 +35,7 @@ export async function explain(
   for (const provider of providers) {
     const input = provider.name === 'fallback' ? fallbackText : prompt
     try {
-      const text = await provider.complete(input, { system, maxTokens: 1200 })
+      const text = await provider.complete(input, { system, maxTokens: 2000, timeoutMs: 180000 })
       return { text, provider: provider.name }
     } catch {
       continue

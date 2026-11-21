@@ -95,7 +95,7 @@ export class OllamaProvider implements LLMProvider {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
-      timeoutMs: options.timeoutMs ?? 15000
+      timeoutMs: options.timeoutMs ?? 180000
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     if (endpoint === 'openai') {
@@ -122,7 +122,7 @@ export class OllamaProvider implements LLMProvider {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
-      timeoutMs: options.timeoutMs ?? 15000
+      timeoutMs: options.timeoutMs ?? 180000
     })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const data = parseJson<{ response?: string; error?: string }>(res)

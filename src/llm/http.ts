@@ -18,7 +18,7 @@ export function httpRequest(url: string, options: HttpOptions = {}): Promise<Htt
     for (const [key, value] of Object.entries(options.headers ?? {})) {
       xhr.setRequestHeader(key, value)
     }
-    xhr.timeout = options.timeoutMs ?? 15000
+    xhr.timeout = options.timeoutMs ?? 180000
     xhr.onload = () => {
       resolve({
         status: xhr.status,
