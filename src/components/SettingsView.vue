@@ -3,6 +3,7 @@ import { reactive, onMounted, ref } from 'vue'
 import { useLearnStore } from '../stores/learn'
 import { store as db, DEFAULT_SETTINGS, exportAll, importAll } from '../storage/db'
 import { OllamaProvider, CloudProvider } from '../llm'
+import { probeOllama } from '../llm/diagnose'
 import type { Settings } from '../core/types'
 
 const app = useLearnStore()
@@ -52,6 +53,28 @@ async function save(): Promise<void> {
   saved.value = true
   app.notify('设置已保存')
   setTimeout(() => (saved.value = false), 2000)
+}
+
+async function diagnoseLocal(): Promise<void> {
+  if (form.llmMode !== 'local') {
+    testResult.value = '详细诊断仅用于电脑本地模式。'
+    return
+  }
+  testing.value = true
+  testResult.value = '正在逐个探测端点…'
+  try {
+    const results = await probeOllama(form.ollamaBaseUrl, form.ollamaModel)
+    testResult.value = results.map((r) => [
+      `${r.ok ? '✓' : '✗'} ${r.label}`,
+      `   URL: ${r.url}`,
+      `   状态: ${r.status ?? '无响应'}`,
+      `   返回: ${r.preview}`
+    ].join('\n')).join('\n\n')
+  } catch (e) {
+    testResult.value = `诊断出错：${e instanceof Error ? e.message : String(e)}`
+  } finally {
+    testing.value = false
+  }
 }
 
 async function testLocal(): Promise<void> {
@@ -149,6 +172,9 @@ async function testLocal(): Promise<void> {
       <button class="btn primary block" @click="save">{{ saved ? '已保存 ✓' : '保存设置' }}</button>
       <button class="btn ghost block" style="margin-top:10px" :disabled="testing" @click="testLocal">
         {{ testing ? '测试中…' : '测试模型连接' }}
+      </button>
+      <button class="btn ghost block" style="margin-top:8px" :disabled="testing" @click="diagnoseLocal">
+        详细诊断（逐个端点）
       </button>
       <div v-if="testResult" class="explain" style="white-space:pre-wrap;margin-top:10px">{{ testResult }}</div>
     </div>
