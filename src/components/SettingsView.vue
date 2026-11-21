@@ -136,7 +136,7 @@ async function testLocal(): Promise<void> {
       <template v-if="form.llmMode === 'local'">
         <div class="field">
           <label>电脑 Ollama 地址（同一 WiFi）</label>
-          <input v-model="form.ollamaBaseUrl" placeholder="http://192.168.1.42:11434" />
+          <input v-model="form.ollamaBaseUrl" placeholder="http://192.168.0.42:11434" />
         </div>
         <div class="field">
           <label>模型名称</label>
