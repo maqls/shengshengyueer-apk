@@ -25,6 +25,20 @@ describe('通用题库', () => {
     expect(grades).toContain(22)
   })
 
+  it('每个学段×每个学科都有预置题（识字限低年级）', () => {
+    const lowGradeOnly: Subject[] = ['literacy']
+    for (const stage of GRADE_STAGES) {
+      const mid = stage.grades[Math.floor(stage.grades.length / 2)]
+      for (const group of SUBJECT_GROUPS) {
+        for (const subject of group.subjects) {
+          if (lowGradeOnly.includes(subject) && stage.key !== 'preschool' && stage.key !== 'primary') continue
+          const found = bankQuestions({ subject, grade: mid })
+          expect(found.length, `${stage.label}·${SUBJECT_LABELS[subject]} 无预置题`).toBeGreaterThan(0)
+        }
+      }
+    }
+  })
+
   it('每道题字段完整', () => {
     for (const q of BANK) {
       expect(q.id).toBeTruthy()
