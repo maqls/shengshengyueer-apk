@@ -22,6 +22,10 @@ const source = ref<'llm' | 'bank'>('bank')
 const explainText = ref('')
 const explainSource = ref('')
 const generating = ref(false)
+const llmStatus = ref('')
+const llmConfigured = computed(() => {
+  return !!app.settings && app.settings.llmMode !== 'off'
+})
 
 const allSubjects: (Subject | undefined)[] = [
   undefined, 'math', 'chinese', 'english', 'literacy', 'science', 'history', 'geography', 'thinking'
@@ -49,13 +53,25 @@ async function newTask(): Promise<void> {
     const providers = llmProviders()
     let next: QuizTask | null = null
     if (providers.length > 1) {
-      next = await generateQuizByLLM(providers, subject.value, grade.value, historyPrompts.value)
-    }
-    if (next) {
-      source.value = 'llm'
+      const resultGen = await generateQuizByLLM(providers, subject.value, grade.value, historyPrompts.value)
+      next = resultGen.task
+      if (next) {
+        source.value = 'llm'
+        llmStatus.value = `已通过 ${resultGen.provider} 出题`
+      } else {
+        source.value = 'bank'
+        llmStatus.value = `模型出题失败，已用离线题库：${resultGen.reason}`
+      }
     } else {
-      next = nextQuiz(subject.value, grade.value, historyIds.value)
       source.value = 'bank'
+      llmStatus.value = !app.settings
+        ? '设置尚未加载完成，已用离线题库'
+        : app.settings.llmMode === 'off'
+          ? '已设为纯离线模式，不调用模型'
+          : '未配置模型，已用离线题库'
+    }
+    if (!next) {
+      next = nextQuiz(subject.value, grade.value, historyIds.value)
     }
     task.value = next
     if (next) {
@@ -130,6 +146,12 @@ onMounted(async () => {
       <div>
         <h1>📚 综合学习</h1>
         <div class="sub">全年级 · 多学科 · 电脑模型动态出题</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:10px 12px">
+      <div class="source-tag" style="line-height:1.7">
+        模型状态：{{ llmConfigured ? '已配置' : '未配置/纯离线' }} · {{ llmStatus || '点击出题后将调用模型' }}
       </div>
     </div>
 

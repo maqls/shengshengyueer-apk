@@ -64,18 +64,24 @@ export function parseGeneratedQuestion(raw: string, subject: Subject, grade?: nu
   }
 }
 
+export interface GenerateResult {
+  task: QuizTask | null
+  provider: string
+  reason: string
+}
+
 export async function generateQuizByLLM(
   providers: LLMProvider[],
   subject: Subject | undefined,
   grade: number | undefined,
   excludePrompts: string[] = []
-): Promise<QuizTask | null> {
+): Promise<GenerateResult> {
   const subjectName = subject ? SUBJECT_LABELS[subject] : '各学科综合'
   const gradeName = grade === undefined ? '不限年级（覆盖小学到初中）' : (GRADE_LABELS[grade] ?? `${grade}年级`)
 
   const system = [
     '你是一位耐心的中小学老师，为学生的练习题生成服务。',
-    '只输出一个 JSON 对象，不要输出任何解释文字、不要 markdown 代码块。',
+    '只输出一个 JSON 对象，不要输出任何解释文字、不要 markdown 代码块、不要多余前后缀。',
     '题目要准确、适合学生年龄、有教育价值。'
   ].join('')
 
@@ -89,20 +95,29 @@ export async function generateQuizByLLM(
     '- knowledge: 这道题考察的知识点名称',
     '- options: 只有当 kind 为 choice 时提供，字符串数组，至少 2 项，且 answer 必须等于其中一项',
     '注意：judge 题的 answer 只能是 "对" 或 "错"；fill 题不要 options 字段。',
+    '只返回 JSON 本身。',
     excludePrompts.length ? `请避免与这些题重复：${excludePrompts.slice(-5).join(' | ')}` : ''
   ].filter(Boolean).join('\n')
 
+  const reasons: string[] = []
   for (const provider of providers) {
     if (provider.name === 'fallback') continue
     try {
-      const raw = await provider.complete(`${system}\n\n${user}`, { timeoutMs: 30000, maxTokens: 600 })
+      const raw = await provider.complete(user, { timeoutMs: 30000, maxTokens: 600, system })
       const task = parseGeneratedQuestion(raw, subject ?? 'math', grade)
-      if (!task) continue
-      if (excludePrompts.includes(task.prompt)) continue
-      return task
-    } catch {
+      if (!task) {
+        reasons.push(`${provider.name}:返回格式无法解析`)
+        continue
+      }
+      if (excludePrompts.includes(task.prompt)) {
+        reasons.push(`${provider.name}:题目重复`)
+        continue
+      }
+      return { task, provider: provider.name, reason: 'ok' }
+    } catch (err) {
+      reasons.push(`${provider.name}:${err instanceof Error ? err.message : '调用失败'}`)
       continue
     }
   }
-  return null
+  return { task: null, provider: '', reason: reasons.join('；') || '未配置模型' }
 }

@@ -1,6 +1,7 @@
 export interface LLMOptions {
   timeoutMs?: number
   maxTokens?: number
+  system?: string
 }
 
 export interface LLMProvider {

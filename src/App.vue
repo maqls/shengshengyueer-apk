@@ -24,8 +24,8 @@ const tabs: { key: typeof tab.value; ico: string; label: string; comp: Component
   { key: 'settings', ico: '⚙️', label: '设置', comp: markRaw(SettingsView) }
 ]
 
-onMounted(() => {
-  store.init()
+onMounted(async () => {
+  await store.init()
 })
 </script>
 

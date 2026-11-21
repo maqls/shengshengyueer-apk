@@ -25,10 +25,11 @@ export class OllamaProvider implements LLMProvider {
   }
 
   async complete(prompt: string, options: LLMOptions = {}): Promise<string> {
+    const system = options.system ?? '你是耐心的小学老师，用孩子能听懂的话分步讲解题目，只讲题目相关内容。'
     const body = {
       model: this.model,
       messages: [
-        { role: 'system', content: '你是耐心的小学老师，用孩子能听懂的话分步讲解题目，只讲题目相关内容。' },
+        { role: 'system', content: system },
         { role: 'user', content: prompt }
       ],
       temperature: 0.3,

@@ -45,8 +45,9 @@ describe('LLM 动态出题', () => {
         })
       }
     }
-    const task = await generateQuizByLLM([provider], 'science', 1)
-    expect(task?.prompt).toBe('太阳从哪边升起？')
+    const result = await generateQuizByLLM([provider], 'science', 1)
+    expect(result.task?.prompt).toBe('太阳从哪边升起？')
+    expect(result.reason).toBe('ok')
   })
 
   it('提供方返回非法内容则回退为 null', async () => {
@@ -55,7 +56,7 @@ describe('LLM 动态出题', () => {
       async isAvailable() { return true },
       async complete() { return '对不起，我无法回答' }
     }
-    expect(await generateQuizByLLM([provider], 'math', undefined)).toBeNull()
+    expect((await generateQuizByLLM([provider], 'math', undefined)).task).toBeNull()
   })
 
   it('跳过 fallback 提供方', async () => {
@@ -65,7 +66,8 @@ describe('LLM 动态出题', () => {
       async isAvailable() { return true },
       async complete() { called = true; return '{"kind":"fill","prompt":"x","answer":"y","explain":"z"}' }
     }
-    await generateQuizByLLM([fb], 'math', undefined)
+    const result = await generateQuizByLLM([fb], 'math', undefined)
     expect(called).toBe(false)
+    expect(result.reason).toContain('未配置模型')
   })
 })
