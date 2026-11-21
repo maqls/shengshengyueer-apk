@@ -1,5 +1,6 @@
 import type { LLMOptions, LLMProvider } from './provider'
-import { LLMError, withTimeout } from './provider'
+import { LLMError } from './provider'
+import { httpRequest, parseJson } from './http'
 
 export class CloudProvider implements LLMProvider {
   readonly name = 'cloud'
@@ -32,23 +33,20 @@ export class CloudProvider implements LLMProvider {
       stream: false
     }
     try {
-      const res = await withTimeout(
-        fetch(this.url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.apiKey}`
-          },
-          body: JSON.stringify(body)
-        }),
-        options.timeoutMs ?? 20000,
-        this.name
-      )
+      const res = await httpRequest(this.url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify(body),
+        timeoutMs: options.timeoutMs ?? 20000
+      })
       if (!res.ok) throw new LLMError(`HTTP ${res.status}`, this.name)
-      const data = (await res.json()) as {
+      const data = parseJson<{
         choices?: { message?: { content?: string } }[]
         error?: { message?: string }
-      }
+      }>(res)
       if (data.error) throw new LLMError(data.error.message ?? '未知错误', this.name)
       const content = data.choices?.[0]?.message?.content
       if (!content) throw new LLMError('返回内容为空', this.name)

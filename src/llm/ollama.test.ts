@@ -1,59 +1,84 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { OllamaProvider } from './ollama'
 
-describe('Ollama 双端点兼容', () => {
+class FakeXHR {
+  static handler: (url: string, body: unknown) => { status: number; text: string }
+  static instances: FakeXHR[] = []
+  method = ''
+  url = ''
+  body = ''
+  timeout = 0
+  headers: Record<string, string> = {}
+  onload: (() => void) | null = null
+  onerror: (() => void) | null = null
+  ontimeout: (() => void) | null = null
+  onabort: (() => void) | null = null
+  status = 200
+  responseText = ''
+
+  constructor() {
+    FakeXHR.instances.push(this)
+  }
+  open(method: string, url: string): void {
+    this.method = method
+    this.url = url
+  }
+  setRequestHeader(key: string, value: string): void {
+    this.headers[key] = value
+  }
+  send(body: string | null): void {
+    this.body = body ?? ''
+    const result = FakeXHR.handler(this.url, JSON.parse(this.body || '{}'))
+    this.status = result.status
+    this.responseText = result.text
+    setTimeout(() => this.onload?.(), 0)
+  }
+}
+
+describe('Ollama 多端点兼容', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
+    FakeXHR.instances = []
   })
 
-  function fakeFetch(handler: (url: string, init?: RequestInit) => Response) {
-    const fn = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      return handler(String(input), init)
-    })
-    vi.stubGlobal('fetch', fn)
-    return fn
+  function stub(handler: (url: string, body: unknown) => { status: number; text: string }) {
+    FakeXHR.handler = handler
+    vi.stubGlobal('XMLHttpRequest', FakeXHR)
   }
 
-  function jsonResponse(data: unknown, status = 200): Response {
-    return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } })
+  function okChat(content: string) {
+    return { status: 200, text: JSON.stringify({ message: { content } }) }
   }
 
   it('OpenAI 端点可用时直接使用', async () => {
-    const fn = fakeFetch((url) => {
+    stub((url) => {
       if (url.includes('/v1/chat/completions')) {
-        return jsonResponse({ choices: [{ message: { content: '正常' } }] })
+        return { status: 200, text: JSON.stringify({ choices: [{ message: { content: '正常' } }] }) }
       }
-      return jsonResponse({ message: { content: '不应使用' } })
+      return okChat('不应使用')
     })
     const p = new OllamaProvider('http://192.168.0.42:11434', 'qwen2.5:7b')
-    const text = await p.complete('你好')
-    expect(text).toBe('正常')
+    expect(await p.complete('你好')).toBe('正常')
     expect(p.lastEndpoint()).toBe('openai')
-    expect(fn.mock.calls[0][0]).toContain('/v1/chat/completions')
+    expect(FakeXHR.instances[0].url).toContain('/v1/chat/completions')
   })
 
-  it('OpenAI 端点 404 时自动降级到原生 /api/chat', async () => {
-    const fn = fakeFetch((url) => {
-      if (url.includes('/v1/chat/completions')) return jsonResponse({ error: 'not found' }, 404)
-      if (url.includes('/api/chat')) return jsonResponse({ message: { content: '原生正常' } })
-      return jsonResponse({}, 404)
+  it('OpenAI 与 chat 均 404 时降级到 /api/generate', async () => {
+    stub((url) => {
+      if (url.includes('/api/generate')) {
+        return { status: 200, text: JSON.stringify({ response: '生成正常' }) }
+      }
+      return { status: 404, text: '404 page not found' }
     })
     const p = new OllamaProvider('http://192.168.0.42:11434', 'qwen2.5:7b')
-    const text = await p.complete('你好')
-    expect(text).toBe('原生正常')
-    expect(p.lastEndpoint()).toBe('native')
-    expect(fn.mock.calls.some((c) => String(c[0]).includes('/api/chat'))).toBe(true)
+    expect(await p.complete('你好')).toBe('生成正常')
+    expect(p.lastEndpoint()).toBe('generate')
+    expect(FakeXHR.instances.some((x) => x.url.includes('/api/generate'))).toBe(true)
   })
 
-  it('记住上次成功的端点，下次优先使用', async () => {
-    fakeFetch((url) => {
-      if (url.includes('/api/chat')) return jsonResponse({ message: { content: 'ok' } })
-      return jsonResponse({ error: 'no' }, 404)
-    })
+  it('全部端点失败时抛出含各端点的错误', async () => {
+    stub(() => ({ status: 404, text: '404' }))
     const p = new OllamaProvider('http://x:11434', 'm')
-    await p.complete('1')
-    expect(p.lastEndpoint()).toBe('native')
-    await p.complete('2')
-    expect(p.lastEndpoint()).toBe('native')
+    await expect(p.complete('hi')).rejects.toThrow(/openai.*native.*generate/)
   })
 })

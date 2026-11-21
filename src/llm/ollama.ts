@@ -1,7 +1,8 @@
 import type { LLMOptions, LLMProvider } from './provider'
-import { LLMError, withTimeout } from './provider'
+import { LLMError } from './provider'
+import { httpRequest, parseJson } from './http'
 
-type Endpoint = 'openai' | 'native'
+type Endpoint = 'openai' | 'native' | 'generate'
 
 export class OllamaProvider implements LLMProvider {
   readonly name = 'ollama'
@@ -19,7 +20,7 @@ export class OllamaProvider implements LLMProvider {
 
   async isAvailable(): Promise<boolean> {
     try {
-      const res = await withTimeout(fetch(`${this.base}/api/tags`), 2500, this.name)
+      const res = await httpRequest(`${this.base}/api/tags`, { timeoutMs: 2500 })
       return res.ok
     } catch {
       return false
@@ -28,87 +29,79 @@ export class OllamaProvider implements LLMProvider {
 
   async complete(prompt: string, options: LLMOptions = {}): Promise<string> {
     const system = options.system ?? '你是耐心的小学老师，用孩子能听懂的话分步讲解题目，只讲题目相关内容。'
-    const order: Endpoint[] = this.preferred === 'openai' ? ['openai', 'native'] : ['native', 'openai']
-    let lastErr: LLMError | null = null
-    for (const endpoint of order) {
+    const order: Endpoint[] = ['openai', 'native', 'generate']
+    const idx = order.indexOf(this.preferred)
+    const ordered = idx > 0 ? [...order.slice(idx), ...order.slice(0, idx)] : order
+    const errors: string[] = []
+    for (const endpoint of ordered) {
       try {
-        const text = endpoint === 'openai'
-          ? await this.completeOpenAI(system, prompt, options)
-          : await this.completeNative(system, prompt, options)
+        const text = await this.call(endpoint, system, prompt, options)
         this.preferred = endpoint
         return text
       } catch (err) {
-        const le = err instanceof LLMError
-          ? err
-          : new LLMError(err instanceof Error ? err.message : String(err), this.name)
-        if (le.message.includes('404') || le.message.includes('不包含')) {
-          lastErr = le
-          continue
-        }
-        throw le
+        const msg = err instanceof Error ? err.message : String(err)
+        errors.push(`${endpoint}:${msg}`)
       }
     }
-    throw lastErr ?? new LLMError('所有接口均不可用', this.name)
+    throw new LLMError(errors.join('；'), this.name)
   }
 
-  private async completeOpenAI(system: string, prompt: string, options: LLMOptions): Promise<string> {
-    const body = {
-      model: this.model,
-      messages: [
-        { role: 'system', content: system },
-        { role: 'user', content: prompt }
-      ],
-      temperature: 0.3,
-      max_tokens: options.maxTokens ?? 500,
-      stream: false
+  private async call(endpoint: Endpoint, system: string, prompt: string, options: LLMOptions): Promise<string> {
+    if (endpoint === 'generate') return this.completeGenerate(system, prompt, options)
+    const body = endpoint === 'openai'
+      ? {
+          model: this.model,
+          messages: [{ role: 'system', content: system }, { role: 'user', content: prompt }],
+          temperature: 0.3,
+          max_tokens: options.maxTokens ?? 500,
+          stream: false
+        }
+      : {
+          model: this.model,
+          messages: [{ role: 'system', content: system }, { role: 'user', content: prompt }],
+          stream: false,
+          options: { temperature: 0.3, num_predict: options.maxTokens ?? 500 }
+        }
+    const url = endpoint === 'openai'
+      ? `${this.base}/v1/chat/completions`
+      : `${this.base}/api/chat`
+    const res = await httpRequest(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      timeoutMs: options.timeoutMs ?? 15000
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    if (endpoint === 'openai') {
+      const data = parseJson<{ choices?: { message?: { content?: string } }[]; error?: string }>(res)
+      if (data.error) throw new Error(data.error)
+      const content = data.choices?.[0]?.message?.content
+      if (!content) throw new Error('返回内容为空')
+      return content.trim()
     }
-    const res = await withTimeout(
-      fetch(`${this.base}/v1/chat/completions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      }),
-      options.timeoutMs ?? 15000,
-      this.name
-    )
-    if (!res.ok) throw new LLMError(`HTTP ${res.status}`, this.name)
-    const data = (await res.json()) as {
-      choices?: { message?: { content?: string } }[]
-      error?: string
-    }
-    if (data.error) throw new LLMError(data.error, this.name)
-    const content = data.choices?.[0]?.message?.content
-    if (!content) throw new LLMError('返回内容为空', this.name)
-    return content.trim()
+    const data = parseJson<{ message?: { content?: string }; error?: string }>(res)
+    if (data.error) throw new Error(data.error)
+    if (!data.message?.content) throw new Error('返回内容为空')
+    return data.message.content.trim()
   }
 
-  private async completeNative(system: string, prompt: string, options: LLMOptions): Promise<string> {
+  private async completeGenerate(system: string, prompt: string, options: LLMOptions): Promise<string> {
     const body = {
       model: this.model,
-      messages: [
-        { role: 'system', content: system },
-        { role: 'user', content: prompt }
-      ],
+      prompt: `${system}\n\n${prompt}`,
       stream: false,
       options: { temperature: 0.3, num_predict: options.maxTokens ?? 500 }
     }
-    const res = await withTimeout(
-      fetch(`${this.base}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      }),
-      options.timeoutMs ?? 15000,
-      this.name
-    )
-    if (!res.ok) throw new LLMError(`HTTP ${res.status}`, this.name)
-    const data = (await res.json()) as {
-      message?: { content?: string }
-      error?: string
-    }
-    if (data.error) throw new LLMError(data.error, this.name)
-    const content = data.message?.content
-    if (!content) throw new LLMError('返回内容为空', this.name)
-    return content.trim()
+    const res = await httpRequest(`${this.base}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      timeoutMs: options.timeoutMs ?? 15000
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const data = parseJson<{ response?: string; error?: string }>(res)
+    if (data.error) throw new Error(data.error)
+    if (!data.response) throw new Error('返回内容为空')
+    return data.response.trim()
   }
 }
