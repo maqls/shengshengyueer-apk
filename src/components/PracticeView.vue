@@ -54,6 +54,19 @@ onMounted(() => {
       </div>
     </div>
 
+    <div class="card">
+      <div class="chips">
+        <button class="chip" :class="{ on: store.mathGrade === undefined }" @click="store.setMathGrade(undefined); store.nextQuestion()">不限年级</button>
+        <button
+          v-for="g in [1,2,3,4,5,6,7,8,9,10]"
+          :key="g"
+          class="chip"
+          :class="{ on: store.mathGrade === g }"
+          @click="store.setMathGrade(g); store.nextQuestion()"
+        >{{ g }}年级</button>
+      </div>
+    </div>
+
     <div v-if="store.loading && !store.current" class="card empty">正在出题…</div>
 
     <template v-else-if="store.current">

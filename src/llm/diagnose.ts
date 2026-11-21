@@ -1,12 +1,23 @@
 import { httpRequest, parseJson, type HttpResult } from './http'
 
+function modelScore(name: string): number {
+  const n = name.toLowerCase()
+  let score = 0
+  if (/vl|vision|multimodal|image|llava|qwen3-vl/.test(n)) score += 1000
+  const sizeMatch = n.match(/(\d+(?:\.\d+)?)\s*b/)
+  if (sizeMatch) score += parseFloat(sizeMatch[1]) * 10
+  if (/70b|72b|32b|27b|14b|13b/.test(n)) score += 500
+  return score
+}
+
 export async function listOllamaModels(baseUrl: string, timeoutMs = 5000): Promise<string[]> {
   const base = baseUrl.replace(/\/$/, '')
   try {
     const res = await httpRequest(`${base}/api/tags`, { timeoutMs })
     if (!res.ok) return []
     const data = parseJson<{ models?: { name?: string }[] }>(res)
-    return (data.models ?? []).map((m) => m.name).filter((n): n is string => Boolean(n))
+    const names = (data.models ?? []).map((m) => m.name).filter((n): n is string => Boolean(n))
+    return names.sort((a, b) => modelScore(a) - modelScore(b))
   } catch {
     return []
   }

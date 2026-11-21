@@ -23,6 +23,7 @@ export const useLearnStore = defineStore('learn', () => {
   const isReview = ref(false)
   const startedAt = ref(Date.now())
   const toast = ref('')
+  const mathGrade = ref<number | undefined>(undefined)
 
   const weakPoints = computed(() => weakestKnowledge(masteries.value))
   const todayCount = computed(() => {
@@ -50,7 +51,11 @@ export const useLearnStore = defineStore('learn', () => {
         isReview.value = true
       } else {
         const focus = weakPoints.value[0]
-        question = generateQuestion(focus ? { knowledge: [focus] } : {})
+        question = generateQuestion(
+          mathGrade.value !== undefined
+            ? { grade: mathGrade.value }
+            : focus ? { knowledge: [focus] } : {}
+        )
         isReview.value = false
       }
       current.value = question
@@ -117,6 +122,11 @@ export const useLearnStore = defineStore('learn', () => {
     await store.saveMasteries(masteries.value)
   }
 
+  function setMathGrade(grade: number | undefined): void {
+    mathGrade.value = grade
+    notify(grade === undefined ? '数学专项：不限年级' : `数学专项：${grade}年级`)
+  }
+
   function notify(message: string): void {
     toast.value = message
     setTimeout(() => {
@@ -135,6 +145,8 @@ export const useLearnStore = defineStore('learn', () => {
     loading,
     isReview,
     toast,
+    mathGrade,
+    setMathGrade,
     weakPoints,
     todayCount,
     init,

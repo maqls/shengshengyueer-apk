@@ -31,7 +31,11 @@ export const ENGLISH_WORDS: EnglishWord[] = [
   { word: 'school', phonetic: '/skuːl/', meaning: '学校', grade: 2, sentence: 'I go to school.' },
   { word: 'friend', phonetic: '/frend/', meaning: '朋友', grade: 2, sentence: 'He is my friend.' },
   { word: 'family', phonetic: '/ˈfæməli/', meaning: '家庭', grade: 2, sentence: 'I love my family.' },
-  { word: 'teacher', phonetic: '/ˈtiːtʃə/', meaning: '老师', grade: 2, sentence: 'She is a teacher.' }
+  { word: 'teacher', phonetic: '/ˈtiːtʃə/', meaning: '老师', grade: 2, sentence: 'She is a teacher.' },
+  { word: 'because', phonetic: '/bɪˈkɒz/', meaning: '因为', grade: 3, sentence: 'I stay home because it rains.' },
+  { word: 'important', phonetic: '/ɪmˈpɔːtnt/', meaning: '重要的', grade: 4, sentence: 'Study is important.' },
+  { word: 'although', phonetic: '/ɔːlˈðəʊ/', meaning: '虽然', grade: 5, sentence: 'Although it is late, I study.' },
+  { word: 'environment', phonetic: '/ɪnˈvaɪrənmənt/', meaning: '环境', grade: 6, sentence: 'We protect the environment.' }
 ]
 
 export function wordsByGrade(grade: number): EnglishWord[] {

@@ -65,8 +65,7 @@ onMounted(newTask)
         <button :class="{ on: mode === 'dictation' }" @click="changeMode('dictation')">听写</button>
       </div>
       <div class="segment">
-        <button :class="{ on: grade === 1 }" @click="grade = 1; newTask()">一年级</button>
-        <button :class="{ on: grade === 2 }" @click="grade = 2; newTask()">二年级</button>
+        <button v-for="g in [1,2,3,4,5,6]" :key="g" :class="{ on: grade === g }" @click="grade = g; newTask()">{{ g }}年级</button>
       </div>
     </div>
 

@@ -47,7 +47,16 @@ export const LITERACY_CHARS: LiteracyChar[] = [
   { char: '绿', pinyin: 'lǜ', grade: 2, words: ['绿色', '绿草', '碧绿'], sentence: '小草是绿色的。' },
   { char: '白', pinyin: 'bái', grade: 2, words: ['白色', '白云', '雪白'], sentence: '云朵是白色的。' },
   { char: '学', pinyin: 'xué', grade: 2, words: ['学习', '上学', '学生'], sentence: '我每天认真学习。' },
-  { char: '书', pinyin: 'shū', grade: 2, words: ['书本', '读书', '书包'], sentence: '我喜欢读书。' }
+  { char: '书', pinyin: 'shū', grade: 2, words: ['书本', '读书', '书包'], sentence: '我喜欢读书。' },
+  { char: '朋', pinyin: 'péng', grade: 3, words: ['朋友', '好友', '小朋友'], sentence: '他是我最好的朋友。' },
+  { char: '远', pinyin: 'yuǎn', grade: 3, words: ['远方', '遥远', '远处'], sentence: '远方有一座山。' },
+  { char: '忙', pinyin: 'máng', grade: 3, words: ['忙碌', '帮忙', '急忙'], sentence: '妈妈今天很忙。' },
+  { char: '甜', pinyin: 'tián', grade: 3, words: ['甜美', '香甜', '甜蜜'], sentence: '这个西瓜很甜。' },
+  { char: '觉', pinyin: 'jué', grade: 4, words: ['感觉', '发觉', '自觉'], sentence: '我觉得很开心。' },
+  { char: '值', pinyin: 'zhí', grade: 4, words: ['值日', '价值', '值得'], sentence: '今天我值日。' },
+  { char: '貌', pinyin: 'mào', grade: 5, words: ['礼貌', '面貌', '外貌'], sentence: '我们要讲礼貌。' },
+  { char: '慧', pinyin: 'huì', grade: 5, words: ['智慧', '聪慧', '慧眼'], sentence: '智慧来自学习。' },
+  { char: '德', pinyin: 'dé', grade: 6, words: ['品德', '道德', '美德'], sentence: '良好的品德很重要。' }
 ]
 
 export function charsByGrade(grade: number): LiteracyChar[] {

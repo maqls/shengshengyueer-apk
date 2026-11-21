@@ -168,7 +168,10 @@ async function testLocal(): Promise<void> {
           </button>
         </div>
         <div class="source-tag">
-          检测到 {{ models.length }} 个模型{{ models.length ? '：' + models.join('、') : '（点刷新或检查连接）' }}。模型名必须是你电脑上实际安装的，否则会报 model not found。
+          检测到 {{ models.length }} 个模型{{ models.length ? '：' + models.join('、') : '（点刷新或检查连接）' }}。已按「纯文本小模型优先」排序。
+          <template v-if="models.some((m) => /vl|vision/i.test(m))">
+            <br /><strong style="color:var(--err)">检测到视觉大模型（如 qwen3-vl），又慢又耗资源，做题用不到。建议在电脑执行：<code>ollama pull qwen3:4b</code>，然后在上方下拉选它，速度可快数倍。</strong>
+          </template>
         </div>
       </template>
 
