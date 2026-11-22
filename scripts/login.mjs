@@ -24,14 +24,17 @@ const SITES = {
     name: '菁优网',
     home: 'https://www.jyeoo.com/',
     login: 'https://www.jyeoo.com/account/loginform',
-    // 登录后首页会有用户名/退出等标记，游客页没有
-    loggedIn: (html) => /退出|个人中心|我的|[uU]ser[Nn]ame/.test(html)
+    checkUrl: 'https://www.jyeoo.com/sj/58c418e0-7db4-4462-8ba0-3656c2b97882',
+    // 试卷页未登录返回 403「警告」页；登录后可看到题目
+    loggedIn: (html) => !html.includes('警告 403') && html.includes('ques-list')
   },
   zujuan: {
     name: '组卷网',
     home: 'https://www.zujuan.com/',
     login: 'https://www.zujuan.com/login',
-    loggedIn: (html) => /退出|个人中心|用户中心|VIP会员|充值中心/.test(html) && !/class="login|用户登录/.test(html)
+    // 首页游客也显示 VIP 字样，不可靠；用详情页判断（未登录会跳转登录页）
+    checkUrl: 'https://www.zujuan.com/question/detail-77971675.shtml',
+    loggedIn: (html) => !html.includes('用户登录') && !html.includes('login.min.css') && html.includes('question')
   }
 }
 
@@ -66,7 +69,7 @@ async function checkStatus(siteKey) {
   const ctx = await openBrowser(siteKey)
   try {
     const page = ctx.pages()[0] || await ctx.newPage()
-    await page.goto(site.home, { waitUntil: 'domcontentloaded', timeout: 30000 })
+    await page.goto(site.checkUrl || site.home, { waitUntil: 'domcontentloaded', timeout: 30000 })
     const html = await page.content()
     return site.loggedIn(html)
   } finally {
