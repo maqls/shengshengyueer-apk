@@ -1,15 +1,17 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
 import type { AnswerRecord, Mastery, Settings } from '../core/types'
+import type { ExamQuestion } from '../core/exam-bank'
 
 interface LearnDB extends DBSchema {
   records: { key: string; value: AnswerRecord; indexes: { 'by-at': number } }
   mastery: { key: string; value: Mastery }
   explanations: { key: string; value: { id: string; text: string; provider: string; at: number } }
   settings: { key: string; value: { key: string } & Settings }
+  examPapers: { key: string; value: ExamQuestion }
 }
 
 const DB_NAME = 'shengshengyueer-learn'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 let dbPromise: Promise<IDBPDatabase<LearnDB>> | null = null
 let currentDb: IDBPDatabase<LearnDB> | null = null
@@ -18,11 +20,22 @@ function getDB(): Promise<IDBPDatabase<LearnDB>> {
   if (!dbPromise) {
     dbPromise = openDB<LearnDB>(DB_NAME, DB_VERSION, {
       upgrade(db) {
-        const records = db.createObjectStore('records', { keyPath: 'id' })
-        records.createIndex('by-at', 'at')
-        db.createObjectStore('mastery', { keyPath: 'knowledge' })
-        db.createObjectStore('explanations', { keyPath: 'id' })
-        db.createObjectStore('settings', { keyPath: 'key' })
+        if (!db.objectStoreNames.contains('records')) {
+          const records = db.createObjectStore('records', { keyPath: 'id' })
+          records.createIndex('by-at', 'at')
+        }
+        if (!db.objectStoreNames.contains('mastery')) {
+          db.createObjectStore('mastery', { keyPath: 'knowledge' })
+        }
+        if (!db.objectStoreNames.contains('explanations')) {
+          db.createObjectStore('explanations', { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains('settings')) {
+          db.createObjectStore('settings', { keyPath: 'key' })
+        }
+        if (!db.objectStoreNames.contains('examPapers')) {
+          db.createObjectStore('examPapers', { keyPath: 'id' })
+        }
       }
     }).then((db) => {
       currentDb = db
@@ -94,6 +107,30 @@ export const store = {
   async saveSettings(settings: Settings): Promise<void> {
     const db = await getDB()
     await db.put('settings', { key: 'default', ...settings })
+  },
+
+  /** 批量保存增量真题，按 id 覆盖（天然去重） */
+  async saveExamPapers(items: ExamQuestion[]): Promise<number> {
+    const db = await getDB()
+    const tx = db.transaction('examPapers', 'readwrite')
+    let added = 0
+    for (const item of items) {
+      const existing = await tx.store.get(item.id)
+      if (!existing) added++
+      await tx.store.put(item)
+    }
+    await tx.done
+    return added
+  },
+
+  async getExamPapers(): Promise<ExamQuestion[]> {
+    const db = await getDB()
+    return db.getAll('examPapers')
+  },
+
+  async examPaperCount(): Promise<number> {
+    const db = await getDB()
+    return db.count('examPapers')
   }
 }
 

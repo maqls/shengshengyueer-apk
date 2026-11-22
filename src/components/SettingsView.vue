@@ -75,6 +75,21 @@ async function save(): Promise<void> {
   setTimeout(() => (saved.value = false), 2000)
 }
 
+const updatingExam = ref(false)
+async function updateExam(): Promise<void> {
+  updatingExam.value = true
+  testResult.value = '正在更新真题库…'
+  try {
+    const { updateExamBank } = await import('../core/exam-update')
+    const result = await updateExamBank()
+    testResult.value = `真题库更新完成：新增 ${result.added} 道，本地共 ${result.total} 道（按题目 ID 去重，重复的不入库）。${result.error ? `\n部分来源失败：${result.error}` : ''}`
+  } catch (e) {
+    testResult.value = `更新失败：${e instanceof Error ? e.message : String(e)}`
+  } finally {
+    updatingExam.value = false
+  }
+}
+
 async function diagnoseLocal(): Promise<void> {
   if (form.llmMode !== 'local') {
     testResult.value = '详细诊断仅用于电脑本地模式。'
@@ -212,6 +227,9 @@ async function testLocal(): Promise<void> {
       </button>
       <button class="btn ghost block" style="margin-top:8px" :disabled="testing" @click="diagnoseLocal">
         详细诊断（逐个端点）
+      </button>
+      <button class="btn ghost block" style="margin-top:8px" :disabled="updatingExam" @click="updateExam">
+        {{ updatingExam ? '正在更新真题库…' : '更新真题库（从开源源拉取新真题）' }}
       </button>
       <div v-if="testResult" class="explain" style="white-space:pre-wrap;margin-top:10px">{{ testResult }}</div>
     </div>
