@@ -6,6 +6,7 @@ import { OllamaProvider, CloudProvider } from '../llm'
 import { probeOllama, listOllamaModels } from '../llm/diagnose'
 import type { Settings } from '../core/types'
 import { TEXTBOOK_VERSIONS } from '../core/question-bank'
+import type { ExamQuestion } from '../core/exam-bank'
 
 const app = useLearnStore()
 const form = reactive<Settings>({ ...DEFAULT_SETTINGS })
@@ -73,6 +74,45 @@ async function save(): Promise<void> {
   saved.value = true
   app.notify('设置已保存')
   setTimeout(() => (saved.value = false), 2000)
+}
+
+// 导入爬虫抓来的题库 JSON（数组，字段同 ExamQuestion），按题目 id 去重存本地
+const importingBank = ref(false)
+async function importBank(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  importingBank.value = true
+  testResult.value = '正在导入题库…'
+  try {
+    const raw = JSON.parse(await file.text()) as unknown
+    const items = (Array.isArray(raw) ? raw : (raw as { exam?: unknown[] }).exam ?? []) as Record<string, unknown>[]
+    if (!items.length) throw new Error('文件里没有题目')
+    const valid = items.filter((q) =>
+      typeof q.prompt === 'string' && Array.isArray(q.options) ? true
+        : typeof q.prompt === 'string' && typeof q.answer === 'string'
+    ).map((q, i) => ({
+      id: String(q.id ?? `import-${Date.now()}-${i}`),
+      subject: (['math', 'chinese', 'english', 'science', 'history', 'geography', 'thinking'].includes(String(q.subject)) ? q.subject : 'math') as ExamQuestion['subject'],
+      kind: (['choice', 'judge', 'fill'].includes(String(q.kind)) ? q.kind : 'fill') as ExamQuestion['kind'],
+      prompt: String(q.prompt),
+      options: Array.isArray(q.options) ? (q.options as unknown[]).filter((o): o is string => typeof o === 'string') : undefined,
+      answer: String(q.answer ?? ''),
+      explain: String(q.explain ?? '暂无解析'),
+      knowledge: String(q.knowledge ?? '导入题库'),
+      grades: Array.isArray(q.grades) ? (q.grades as unknown[]).filter((g): g is number => typeof g === 'number') : [10, 11, 12],
+      year: Number(q.year) || new Date().getFullYear(),
+      category: String(q.category ?? ''),
+      source: String(q.source ?? '导入')
+    }))
+    const added = await db.saveExamPapers(valid)
+    testResult.value = `题库导入完成：文件 ${items.length} 题，有效 ${valid.length} 题，新增 ${added} 题（按 ID 去重，重复的跳过）。本地题库共 ${await db.examPaperCount()} 题。`
+  } catch (e) {
+    testResult.value = `题库导入失败：${e instanceof Error ? e.message : String(e)}`
+  } finally {
+    importingBank.value = false
+    input.value = ''
+  }
 }
 
 const updatingExam = ref(false)
@@ -231,6 +271,10 @@ async function testLocal(): Promise<void> {
       <button class="btn ghost block" style="margin-top:8px" :disabled="updatingExam" @click="updateExam">
         {{ updatingExam ? '正在更新真题库…' : '更新真题库（从开源源拉取新真题）' }}
       </button>
+      <div class="field" style="margin-top:12px">
+        <label>导入爬取的题库 JSON（菁优网/组卷网等，按 ID 去重）</label>
+        <input type="file" accept=".json,application/json" :disabled="importingBank" @change="importBank" />
+      </div>
       <div v-if="testResult" class="explain" style="white-space:pre-wrap;margin-top:10px">{{ testResult }}</div>
     </div>
 

@@ -17,6 +17,7 @@ const year = ref<number | undefined>(undefined)
 const task = ref<ExamQuestion | null>(null)
 const options = ref<string[]>([])
 const selected = ref('')
+const textAnswer = ref('')
 const result = ref<'correct' | 'wrong' | null>(null)
 const explainText = ref('')
 const explainLoading = ref(false)
@@ -46,6 +47,7 @@ async function newTask(): Promise<void> {
   const next = await nextExamWithLocal({ subject: subject.value, year: year.value }, historyIds.value, local)
   task.value = next
   selected.value = ''
+  textAnswer.value = ''
   result.value = null
   explainText.value = ''
   if (next) {
@@ -56,9 +58,12 @@ async function newTask(): Promise<void> {
 }
 
 async function submit(): Promise<void> {
-  if (!task.value || result.value || !selected.value) return
+  if (!task.value || result.value) return
   const current = task.value
-  const correct = selected.value === current.answer
+  const answer = current.kind === 'choice' ? selected.value : textAnswer.value.trim()
+  if (!answer) return
+  const norm = (s: string) => s.trim().replace(/[。．.]$/, '').replace(/\s+/g, '')
+  const correct = norm(answer) === norm(current.answer)
   result.value = correct ? 'correct' : 'wrong'
   explainText.value = current.explain
 
@@ -73,7 +78,7 @@ async function submit(): Promise<void> {
     const user = buildExplainUser({
       question: current.prompt,
       answer: current.answer,
-      userAnswer: selected.value,
+      userAnswer: answer,
       correct
     })
     const outcome = await explain(providers, user, fallback, buildExplainSystem())
@@ -161,8 +166,15 @@ onMounted(async () => {
           @click="selected = opt"
         >{{ opt }}</div>
       </div>
+      <input
+        v-else
+        class="answer-input"
+        v-model="textAnswer"
+        placeholder="输入答案"
+        @keyup.enter="submit"
+      />
       <div class="row" style="margin-top:14px">
-        <button class="btn primary" style="flex:1" :disabled="!!result || !selected" @click="submit">提交答案</button>
+        <button class="btn primary" style="flex:1" :disabled="!!result || (!selected && !textAnswer.trim())" @click="submit">提交答案</button>
         <button class="btn ghost small" @click="newTask">换一题</button>
       </div>
       <div v-if="result" class="explain">
