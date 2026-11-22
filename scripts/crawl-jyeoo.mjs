@@ -7,17 +7,28 @@
  * - 只取「题干 / 选项 / 答案 / 考点」；不抓取有版权声明的「解答 / 点评」原文
  * - 限速 800ms/请求，仅用于个人学习
  *
- * 用法：node scripts/crawl-jyeoo.mjs [输出文件] [抓几份试卷]
+ * 试卷页需登录：从浏览器 F12 → Network → 试卷页请求 → Request Headers 复制 Cookie，
+ * 通过环境变量 JY_COOKIE 传入（或用 --cookie-file 从文本文件读取，避免命令行泄露）：
+ *   $env:JY_COOKIE = '你的Cookie'; node scripts/crawl-jyeoo.mjs 输出.json 份数
+ *   node scripts/crawl-jyeoo.mjs 输出.json 份数 --cookie-file cookie.txt
+ *
+ * 用法：node scripts/crawl-jyeoo.mjs [输出文件] [抓几份试卷] [--cookie-file 文件]
  */
-import { writeFileSync, mkdirSync } from 'node:fs'
+import { writeFileSync, mkdirSync, readFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 
 const OUT = process.argv[2] || 'src/data/jyeoo-exam.json'
 const PAPER_LIMIT = Number(process.argv[3] || 30)
 const BASE = 'https://www.jyeoo.com'
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
-// 菁优网有频率限制，连续请求会 403；默认 3 秒/请求，建议只抓少量补充
+// 限速 3 秒/请求，避免频繁请求被风控
 const DELAY = 3000
+
+// 登录 Cookie：优先环境变量，其次 --cookie-file 文件
+const cookieFileIdx = process.argv.indexOf('--cookie-file')
+const COOKIE = process.env.JY_COOKIE || (cookieFileIdx >= 0 && process.argv[cookieFileIdx + 1]
+  ? readFileSync(process.argv[cookieFileIdx + 1], 'utf8').trim()
+  : '')
 
 function stripTags(html) {
   // MathJye 公式 DOM -> 可读文本（分式/上下标/根号近似还原）
@@ -48,7 +59,10 @@ function stripTags(html) {
 
 // 真实浏览器请求头 + 会话 Cookie（node fetch 不自动管理 cookie）
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
-let cookie = ''
+let cookie = COOKIE
+if (!cookie) {
+  console.error('警告：未提供登录 Cookie（JY_COOKIE / --cookie-file），试卷页将返回 403。')
+}
 
 function headers(referer = BASE + '/') {
   return {
@@ -70,8 +84,9 @@ async function get(url, referer) {
         redirect: 'follow',
         signal: AbortSignal.timeout(25000)
       })
+      // 有登录 Cookie 时不要被响应的游客 Cookie 覆盖
       const setCookie = res.headers.get('set-cookie')
-      if (setCookie) cookie = setCookie.split(';')[0]
+      if (!COOKIE && setCookie) cookie = setCookie.split(';')[0]
       if (res.status === 403 || res.status === 429) {
         // 反爬退避：10s / 25s / 45s
         if (i === 3) throw new Error(`HTTP ${res.status}（反爬拦截）`)
