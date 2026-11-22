@@ -82,7 +82,7 @@ async function updateExam(): Promise<void> {
   try {
     const { updateExamBank } = await import('../core/exam-update')
     const result = await updateExamBank()
-    testResult.value = `真题库更新完成：新增 ${result.added} 道，本地共 ${result.total} 道（按题目 ID 去重，重复的不入库）。${result.error ? `\n部分来源失败：${result.error}` : ''}`
+    testResult.value = `真题库更新完成：新增 ${result.added} 道，重复卷子跳过 ${result.skipped} 道，本地共 ${result.total} 道。\n（按「同一份真题卷」去重：年份+卷型+学科相同即视为同一份，整份只入库一次，重复点更新不会重复添加。）${result.error ? `\n部分来源失败：${result.error}` : ''}`
   } catch (e) {
     testResult.value = `更新失败：${e instanceof Error ? e.message : String(e)}`
   } finally {
