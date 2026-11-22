@@ -14,8 +14,9 @@
  *
  * 用法：node scripts/crawl-jyeoo.mjs [输出文件] [抓几份试卷] [--cookie-file 文件]
  */
-import { writeFileSync, mkdirSync, readFileSync } from 'node:fs'
-import { dirname } from 'node:path'
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const OUT = process.argv[2] || 'src/data/jyeoo-exam.json'
 const PAPER_LIMIT = Number(process.argv[3] || 30)
@@ -24,11 +25,12 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 // 限速 3 秒/请求，避免频繁请求被风控
 const DELAY = 3000
 
-// 登录 Cookie：优先环境变量，其次 --cookie-file 文件
+// 登录 Cookie：优先环境变量 / --cookie-file，其次自动读取 login.mjs 保存的 .cookie-jyeoo.txt
 const cookieFileIdx = process.argv.indexOf('--cookie-file')
+const autoCookie = join(dirname(fileURLToPath(import.meta.url)), '.cookie-jyeoo.txt')
 const COOKIE = process.env.JY_COOKIE || (cookieFileIdx >= 0 && process.argv[cookieFileIdx + 1]
   ? readFileSync(process.argv[cookieFileIdx + 1], 'utf8').trim()
-  : '')
+  : existsSync(autoCookie) ? readFileSync(autoCookie, 'utf8').trim() : '')
 
 function stripTags(html) {
   // MathJye 公式 DOM -> 可读文本（分式/上下标/根号近似还原）
@@ -88,9 +90,8 @@ async function get(url, referer) {
       const setCookie = res.headers.get('set-cookie')
       if (!COOKIE && setCookie) cookie = setCookie.split(';')[0]
       if (res.status === 403 || res.status === 429) {
-        // 反爬退避：10s / 25s / 45s
-        if (i === 3) throw new Error(`HTTP ${res.status}（反爬拦截）`)
-        await sleep([0, 10000, 25000, 45000][i])
+        if (i >= 1) throw new Error(`HTTP ${res.status}（登录态可能过期，请运行：node scripts/login.mjs jyeoo）`)
+        await sleep(8000)
         continue
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`)

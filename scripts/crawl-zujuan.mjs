@@ -9,8 +9,9 @@
  *   node scripts/crawl-zujuan.mjs 输出.json 每学科页数
  *   node scripts/crawl-zujuan.mjs 输出.json 3 --cookie-file cookie.txt
  */
-import { writeFileSync, mkdirSync, readFileSync } from 'node:fs'
-import { dirname } from 'node:path'
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const OUT = process.argv[2] || 'src/data/zujuan-exam.json'
 const PAGES_PER_SUBJECT = Number(process.argv[3] || 3)
@@ -19,9 +20,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const DELAY = 2500
 
 const cookieFileIdx = process.argv.indexOf('--cookie-file')
+const autoCookie = join(dirname(fileURLToPath(import.meta.url)), '.cookie-zujuan.txt')
 const COOKIE = process.env.ZJ_COOKIE || (cookieFileIdx >= 0 && process.argv[cookieFileIdx + 1]
   ? readFileSync(process.argv[cookieFileIdx + 1], 'utf8').trim()
-  : '')
+  : existsSync(autoCookie) ? readFileSync(autoCookie, 'utf8').trim() : '')
 
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
 
@@ -127,7 +129,10 @@ async function fetchAnswer(detail) {
   try {
     const html = await get(BASE + detail)
     await sleep(DELAY)
-    if (html.includes('用户登录') && html.includes('login.min.css')) return ''
+    if (html.includes('用户登录') && html.includes('login.min.css')) {
+      console.error('⚠ 登录态过期，答案抓取跳过。重登：node scripts/login.mjs zujuan')
+      return ''
+    }
     const m = html.match(/(?:正确答案|【答案】|参考答案)[：:]?\s*([^<\n]{1,80})/)
     return m ? cleanHtml(m[1]).trim() : ''
   } catch {

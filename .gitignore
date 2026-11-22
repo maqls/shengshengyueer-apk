@@ -9,3 +9,8 @@ android/keystore/*.keystore
 
 # 本地 SDK 路径
 android/local.properties
+
+# 爬虫登录凭证（Cookie/浏览器配置，严禁提交）
+scripts/.cookie-*.txt
+scripts/.browser-profiles/
+
