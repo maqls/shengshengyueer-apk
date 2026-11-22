@@ -24,10 +24,14 @@ export class QuizPrefetcher {
     prefetchState.value = { cached: this.cache.length, filling: this.filling, warming: this.warming }
   }
 
-  private filterKey(subject: Subject | Subject[] | undefined, grade: number | number[] | undefined): string {
+  private filterKey(
+    subject: Subject | Subject[] | undefined,
+    grade: number | number[] | undefined,
+    extra?: { textbookVersion?: string; examYear?: number }
+  ): string {
     const s = subject === undefined ? 'all' : Array.isArray(subject) ? subject.join(',') : subject
     const g = grade === undefined ? 'all' : Array.isArray(grade) ? grade.join(',') : String(grade)
-    return `${s}|${g}`
+    return `${s}|${g}|${extra?.textbookVersion ?? ''}|${extra?.examYear ?? ''}`
   }
 
   size(): number {
@@ -40,8 +44,12 @@ export class QuizPrefetcher {
     this.sync()
   }
 
-  take(subject: Subject | Subject[] | undefined, grade: number | number[] | undefined): QuizTask | null {
-    const key = this.filterKey(subject, grade)
+  take(
+    subject: Subject | Subject[] | undefined,
+    grade: number | number[] | undefined,
+    extra?: { textbookVersion?: string; examYear?: number }
+  ): QuizTask | null {
+    const key = this.filterKey(subject, grade, extra)
     if (key !== this.key) {
       this.cache = []
       this.key = key
@@ -71,7 +79,8 @@ export class QuizPrefetcher {
     providers: LLMProvider[],
     subject: Subject | Subject[] | undefined,
     grade: number | number[] | undefined,
-    exclude: string[] = []
+    exclude: string[] = [],
+    extra?: { textbookVersion?: string; examYear?: number }
   ): Promise<void> {
     if (this.filling) {
       // 忙时记下待补标记，本轮结束后自动继续补满
@@ -79,7 +88,7 @@ export class QuizPrefetcher {
       return
     }
     if (this.cache.length >= CACHE_SIZE) return
-    const key = this.filterKey(subject, grade)
+    const key = this.filterKey(subject, grade, extra)
     if (key !== this.key) {
       this.cache = []
       this.key = key
@@ -94,7 +103,8 @@ export class QuizPrefetcher {
             providers,
             subject,
             grade,
-            [...exclude, ...this.cache.map((q) => q.prompt)]
+            [...exclude, ...this.cache.map((q) => q.prompt)],
+            extra
           )
           if (result.task) {
             this.cache.push(result.task)

@@ -12,7 +12,7 @@ describe('预生成缓存', () => {
   it('take 在筛选变化时清空缓存', () => {
     const p = new QuizPrefetcher()
     ;(p as unknown as { cache: unknown[] }).cache = [fakeTask('a'), fakeTask('b')]
-    ;(p as unknown as { key: string }).key = 'math|1'
+    ;(p as unknown as { key: string }).key = 'math|1||'
     expect(p.take('math', 1)?.id).toBe('a')
     expect(p.size()).toBe(1)
     expect(p.take('english', 1)).toBeNull()
@@ -22,7 +22,7 @@ describe('预生成缓存', () => {
   it('相同筛选连续取题', () => {
     const p = new QuizPrefetcher()
     ;(p as unknown as { cache: unknown[] }).cache = [fakeTask('a'), fakeTask('b')]
-    ;(p as unknown as { key: string }).key = 'math|1'
+    ;(p as unknown as { key: string }).key = 'math|1||'
     expect(p.take('math', 1)?.id).toBe('a')
     expect(p.take('math', 1)?.id).toBe('b')
     expect(p.take('math', 1)).toBeNull()
@@ -45,7 +45,7 @@ describe('预生成缓存', () => {
 
   it('fill 忙时请求不丢弃，忙完自动补满', async () => {
     const p = new QuizPrefetcher()
-    ;(p as unknown as { key: string }).key = 'math|1'
+    ;(p as unknown as { key: string }).key = 'math|1||'
     const provider = {
       name: 'ollama',
       complete: vi.fn().mockResolvedValue(JSON.stringify({
@@ -64,7 +64,7 @@ describe('预生成缓存', () => {
 
   it('模型失败时用题库题兜底填充', async () => {
     const p = new QuizPrefetcher()
-    ;(p as unknown as { key: string }).key = 'math|1'
+    ;(p as unknown as { key: string }).key = 'math|1||'
     const provider = { name: 'ollama', complete: vi.fn().mockRejectedValue(new Error('down')), isAvailable: vi.fn() }
     await p.fill([provider], 'math', 1, [])
     expect((p as unknown as { cache: unknown[] }).cache.length).toBe(5)

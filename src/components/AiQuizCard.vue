@@ -11,9 +11,19 @@ import { resolveSettings } from '../llm/resolve'
 import { quizPrefetcher } from '../llm/prefetch'
 import type { LLMProvider } from '../llm/provider'
 
-const props = defineProps<{ subject: Subject; grade: number | undefined }>()
+const props = defineProps<{
+  subject: Subject | Subject[] | undefined
+  grade: number | undefined
+  examYear?: number
+}>()
 
 const app = useLearnStore()
+
+// 教材版本统一从设置读取；真题模式额外注入年份
+const examOpts = () => ({
+  textbookVersion: app.settings?.textbookVersion,
+  examYear: props.examYear
+})
 const task = ref<QuizTask | null>(null)
 const input = ref('')
 const selected = ref('')
@@ -45,9 +55,9 @@ async function newTask(): Promise<void> {
     const hasLLM = providers.length > 1
     let next: QuizTask | null = null
     if (hasLLM) {
-      next = quizPrefetcher.take(props.subject, props.grade)
+      next = quizPrefetcher.take(props.subject, props.grade, examOpts())
       if (!next) {
-        const resultGen = await generateQuizByLLM(providers, props.subject, props.grade, historyPrompts.value)
+        const resultGen = await generateQuizByLLM(providers, props.subject, props.grade, historyPrompts.value, examOpts())
         next = resultGen.task
       }
       source.value = next?.id.startsWith('ai-') ? 'llm' : 'bank'
@@ -62,7 +72,7 @@ async function newTask(): Promise<void> {
       shuffled.value = next.options ? shuffle(next.options) : []
     }
     if (hasLLM) {
-      void quizPrefetcher.fill(providers, props.subject, props.grade, historyPrompts.value)
+      void quizPrefetcher.fill(providers, props.subject, props.grade, historyPrompts.value, examOpts())
     }
   } finally {
     generating.value = false
@@ -102,7 +112,7 @@ async function submit(): Promise<void> {
 onMounted(async () => {
   const providers = await llmProviders()
   if (providers.length > 1) {
-    const cached = quizPrefetcher.take(props.subject, props.grade)
+    const cached = quizPrefetcher.take(props.subject, props.grade, examOpts())
     if (cached) {
       task.value = cached
       source.value = cached.id.startsWith('ai-') ? 'llm' : 'bank'
@@ -116,7 +126,7 @@ onMounted(async () => {
       shuffled.value = task.value.options ? shuffle(task.value.options) : []
     }
     void quizPrefetcher.warmup(providers).then(() =>
-      quizPrefetcher.fill(providers, props.subject, props.grade, historyPrompts.value)
+      quizPrefetcher.fill(providers, props.subject, props.grade, historyPrompts.value, examOpts())
     )
   } else {
     await newTask()
@@ -125,7 +135,7 @@ onMounted(async () => {
 
 // 年级或学科变化时重新出题
 watch(
-  () => [props.subject, props.grade],
+  () => [props.subject, props.grade, props.examYear, app.settings?.textbookVersion],
   () => {
     void newTask()
   }

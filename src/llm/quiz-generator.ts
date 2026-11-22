@@ -74,7 +74,8 @@ export async function generateQuizByLLM(
   providers: LLMProvider[],
   subject: Subject | Subject[] | undefined,
   grade: number | number[] | undefined,
-  excludePrompts: string[] = []
+  excludePrompts: string[] = [],
+  options: { textbookVersion?: string; examYear?: number } = {}
 ): Promise<GenerateResult> {
   const subjectLabelOne = (s: Subject): string => SUBJECT_LABELS[s] ?? s
   const subjectName = subject === undefined
@@ -99,8 +100,16 @@ export async function generateQuizByLLM(
     '题目要准确、适合学生年龄、有教育价值。'
   ].join('')
 
+  const versionNote = options.textbookVersion
+    ? `题目范围遵循【${options.textbookVersion}】教材知识点。`
+    : ''
+  const yearNote = options.examYear
+    ? `请按【${options.examYear} 年历年真题的风格与难度】出题（真题风格模拟，不要照抄原题）。`
+    : ''
   const user = [
     `请出一道适合【${gradeName}】的【${subjectName}】练习题。`,
+    versionNote,
+    yearNote,
     'JSON 字段要求：',
     '- kind: 只能是 "choice"（选择题）、"judge"（判断题）、"fill"（填空题）之一',
     '- prompt: 题干文字',

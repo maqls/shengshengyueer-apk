@@ -3,9 +3,11 @@ import { ref, markRaw, type Component } from 'vue'
 import PracticeView from './PracticeView.vue'
 import LiteracyView from './LiteracyView.vue'
 import EnglishView from './EnglishView.vue'
+import ExamView from './ExamView.vue'
 
-const sub = ref<'math' | 'literacy' | 'english'>('math')
+const sub = ref<'exam' | 'math' | 'literacy' | 'english'>('exam')
 const tabs: { key: typeof sub.value; label: string; comp: Component }[] = [
+  { key: 'exam', label: '历年真题', comp: markRaw(ExamView) },
   { key: 'math', label: '数学专项', comp: markRaw(PracticeView) },
   { key: 'literacy', label: '识字专项', comp: markRaw(LiteracyView) },
   { key: 'english', label: '英语专项', comp: markRaw(EnglishView) }

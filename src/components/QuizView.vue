@@ -30,6 +30,8 @@ const explainText = ref('')
 const explainSource = ref('')
 const generating = ref(false)
 
+const examOpts = () => ({ textbookVersion: app.settings?.textbookVersion })
+
 const allGrades = computed(() => availableGrades())
 const currentStage = computed(() => GRADE_STAGES.find((s) => s.key === gradeStage.value))
 const currentGroup = computed(() => SUBJECT_GROUPS.find((g) => g.key === subjectGroup.value))
@@ -99,9 +101,9 @@ async function newTask(): Promise<void> {
     let next: QuizTask | null = null
 
     if (hasLLM) {
-      next = quizPrefetcher.take(effectiveSubjects(), effectiveGrade())
+      next = quizPrefetcher.take(effectiveSubjects(), effectiveGrade(), examOpts())
       if (!next) {
-        const resultGen = await generateQuizByLLM(providers, effectiveSubjects(), effectiveGrade(), historyPrompts.value)
+        const resultGen = await generateQuizByLLM(providers, effectiveSubjects(), effectiveGrade(), historyPrompts.value, examOpts())
         next = resultGen.task
       }
       source.value = next?.id.startsWith('ai-') ? 'llm' : 'bank'
@@ -117,7 +119,7 @@ async function newTask(): Promise<void> {
       historyPrompts.value.push(next.prompt)
     }
     if (hasLLM) {
-      void quizPrefetcher.fill(providers, effectiveSubjects(), effectiveGrade(), historyPrompts.value)
+      void quizPrefetcher.fill(providers, effectiveSubjects(), effectiveGrade(), historyPrompts.value, examOpts())
     }
   } finally {
     generating.value = false
@@ -177,7 +179,7 @@ onMounted(async () => {
   if (!app.settings) await app.init()
   const providers = await llmProviders()
   if (providers.length > 1) {
-    const cached = quizPrefetcher.take(effectiveSubjects(), effectiveGrade())
+    const cached = quizPrefetcher.take(effectiveSubjects(), effectiveGrade(), examOpts())
     if (cached) {
       task.value = cached
       source.value = cached.id.startsWith('ai-') ? 'llm' : 'bank'
@@ -190,7 +192,7 @@ onMounted(async () => {
       historyPrompts.value.push(task.value.prompt)
     }
     void quizPrefetcher.warmup(providers).then(() =>
-      quizPrefetcher.fill(providers, effectiveSubjects(), effectiveGrade(), historyPrompts.value)
+      quizPrefetcher.fill(providers, effectiveSubjects(), effectiveGrade(), historyPrompts.value, examOpts())
     )
   } else {
     await newTask()

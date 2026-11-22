@@ -242,6 +242,12 @@ add(
   q('english', [19, 20, 21, 22], 'fill', '论文中“本文提出一种新方法”常译为：This paper ____ a novel method.', 'proposes', 'propose 表示提出。', undefined, 'english:学术写作')
 )
 
+/** K12 教材版本（统一配置，默认人教版）；模型出题时作为知识点范围约束 */
+export const TEXTBOOK_VERSIONS: string[] = [
+  '人教版', '部编版', '北师大版', '苏教版', '华师大版', '外研版',
+  '译林版', '沪教版', '鲁教版', '冀教版', '浙教版', '粤教版', '西师版'
+]
+
 export function bankQuestions(filter: {
   subject?: Subject
   grade?: number

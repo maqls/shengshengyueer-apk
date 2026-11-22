@@ -39,7 +39,8 @@ export const DEFAULT_SETTINGS: Settings = {
   cloudBaseUrl: '',
   cloudModel: 'deepseek-chat',
   cloudApiKey: '',
-  dailyGoal: 20
+  dailyGoal: 20,
+  textbookVersion: '人教版'
 }
 
 export const store = {

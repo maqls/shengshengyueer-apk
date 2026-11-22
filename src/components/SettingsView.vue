@@ -5,6 +5,7 @@ import { store as db, DEFAULT_SETTINGS, exportAll, importAll } from '../storage/
 import { OllamaProvider, CloudProvider } from '../llm'
 import { probeOllama, listOllamaModels } from '../llm/diagnose'
 import type { Settings } from '../core/types'
+import { TEXTBOOK_VERSIONS } from '../core/question-bank'
 
 const app = useLearnStore()
 const form = reactive<Settings>({ ...DEFAULT_SETTINGS })
@@ -195,6 +196,14 @@ async function testLocal(): Promise<void> {
       <div class="field" style="margin-top:14px">
         <label>每日目标（题）</label>
         <input v-model.number="form.dailyGoal" type="number" min="1" max="200" />
+      </div>
+
+      <div class="field" style="margin-top:14px">
+        <label>教材版本（K12 全学段统一，默认人教版）</label>
+        <select v-model="form.textbookVersion">
+          <option v-for="v in TEXTBOOK_VERSIONS" :key="v" :value="v">{{ v }}</option>
+        </select>
+        <div class="source-tag">此版本会作为模型出题的知识点范围约束；切换后请重新出题以生效。</div>
       </div>
 
       <button class="btn primary block" @click="save">{{ saved ? '已保存 ✓' : '保存设置' }}</button>

@@ -75,4 +75,5 @@ export interface Settings {
   cloudModel: string
   cloudApiKey: string
   dailyGoal: number
+  textbookVersion: string
 }
