@@ -157,15 +157,13 @@ async function main() {
             if (seen.has(key)) continue
             seen.add(key)
             const answer = await fetchAnswer(item.detail)
-            // 无答案的题无法判分，不入库（用 Cookie 跑才会抓到答案）
-            if (!answer) continue
             all.push({
               id: `zj-${item.id || key.slice(0, 12)}`,
               subject,
               kind: 'fill',
               prompt: item.prompt,
-              answer,
-              explain: '答案来自组卷网（解析原文不入库）',
+              answer: answer || '（待补：到组卷网查看该答案解析）',
+              explain: answer ? '答案来自组卷网（解析原文不入库）' : '题干来自组卷网，答案需登录原站查看',
               knowledge: `组卷网:${xd}:${label}`,
               grades: classifyGrades(xd),
               source: '组卷网'
