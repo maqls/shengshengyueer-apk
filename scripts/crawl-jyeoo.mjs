@@ -46,19 +46,54 @@ function stripTags(html) {
     .trim()
 }
 
-async function get(url) {
-  for (let i = 0; i < 3; i++) {
+// 真实浏览器请求头 + 会话 Cookie（node fetch 不自动管理 cookie）
+const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36'
+let cookie = ''
+
+function headers(referer = BASE + '/') {
+  return {
+    'User-Agent': UA,
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    'Accept-Encoding': 'identity',
+    'Cache-Control': 'no-cache',
+    'Referer': referer,
+    ...(cookie ? { Cookie: cookie } : {})
+  }
+}
+
+async function get(url, referer) {
+  for (let i = 0; i < 4; i++) {
     try {
       const res = await fetch(url, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; PersonalStudyCollector/1.0)' },
-        signal: AbortSignal.timeout(20000)
+        headers: headers(referer),
+        redirect: 'follow',
+        signal: AbortSignal.timeout(25000)
       })
+      const setCookie = res.headers.get('set-cookie')
+      if (setCookie) cookie = setCookie.split(';')[0]
+      if (res.status === 403 || res.status === 429) {
+        // 反爬退避：10s / 25s / 45s
+        if (i === 3) throw new Error(`HTTP ${res.status}（反爬拦截）`)
+        await sleep([0, 10000, 25000, 45000][i])
+        continue
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       return await res.text()
     } catch (e) {
-      if (i === 2) throw e
-      await sleep(1500)
+      if (i === 3) throw e
+      await sleep(3000)
     }
+  }
+}
+
+// 先访问首页建立会话（模拟真人先打开网站）
+async function initSession() {
+  try {
+    const html = await get(BASE + '/')
+    console.error(`会话建立（首页 ${html.length} 字节）`)
+  } catch (e) {
+    console.error(`会话建立失败（不影响后续）: ${e.message}`)
   }
 }
 
@@ -120,7 +155,7 @@ function parsePaper(html) {
 // 从试题详情页取正确答案字母（label class=" s"）+ 考点（不抓解答/点评）
 async function fetchAnswer(detail) {
   if (!detail) return { letter: '', knowledge: '' }
-  const html = await get(BASE + detail)
+  const html = await get(BASE + detail, `${BASE}/sj/`)
   const correct = html.match(/<label class=" s">([^<]+)<\/label>/)
   const letter = correct ? stripTags(correct[1]).match(/^[A-D]/)?.[0] ?? '' : ''
   const point = html.match(/<div class="pt3">[\s\S]*?<a[^>]*>([^<]+)<\/a>/)
@@ -128,6 +163,7 @@ async function fetchAnswer(detail) {
 }
 
 async function main() {
+  await initSession()
   const urls = await paperUrls(PAPER_LIMIT)
   console.error(`sitemap 取到 ${urls.length} 份试卷`)
   const all = []
